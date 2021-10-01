@@ -2,10 +2,10 @@
 title: "ST558 - Vignette Project - Covid-19 Data"
 author: "Jasmine Wang"
 date: "10/05/2021"
-output: 
-  #html_document:
-    #toc: yes
-    #df_print: "paged"
+#output: 
+#  html_document:
+#    toc: yes
+#    df_print: "paged"
 ---
 
 ```{r setup, include=FALSE, message=FALSE, warning=FALSE}
@@ -32,7 +32,8 @@ may_1 <- GET("https://api.covid19api.com/country/united-states?from=2021-05-31T0
 jun_1 <- GET("https://api.covid19api.com/country/united-states?from=2021-06-30T00:00:00Z&to=2021-06-30T23:59:59Z")
 jul_1 <- GET("https://api.covid19api.com/country/united-states?from=2021-07-31T00:00:00Z&to=2021-07-31T23:59:59Z")
 aug_1 <- GET("https://api.covid19api.com/country/united-states?from=2021-08-31T00:00:00Z&to=2021-08-31T23:59:59Z")
-#sep_1 <- GET("https://api.covid19api.com/country/united-states?from=2021-01-31T00:00:00Z&to=2021-01-31T23#:59:59Z")
+sep_1 <- GET("https://api.covid19api.com/country/united-states?from=2021-09-30T00:00:00Z&to=2021-09-30T23:59:59Z")
+
 dec_2 <- rawToChar(dec_1$content)
 jan_2 <- rawToChar(jan_1$content)
 feb_2 <- rawToChar(feb_1$content)
@@ -42,6 +43,7 @@ may_2 <- rawToChar(may_1$content)
 jun_2 <- rawToChar(jun_1$content)
 jul_2 <- rawToChar(jul_1$content)
 aug_2 <- rawToChar(aug_1$content)
+sep_2 <- rawToChar(sep_1$content)
 
 dec_3 <- fromJSON(dec_2)
 jan_3 <- fromJSON(jan_2)
@@ -52,6 +54,7 @@ may_3 <- fromJSON(may_2)
 jun_3 <- fromJSON(jun_2)
 jul_3 <- fromJSON(jul_2)
 aug_3 <- fromJSON(aug_2)
+sep_3 <- fromJSON(sep_2)
 
 dec_4 <- dec_3 %>% select(Province, Deaths, Active, Date) 
 jan_4 <- jan_3 %>% select(Province, Deaths, Active, Date)
@@ -62,41 +65,84 @@ may_4 <- may_3 %>% select(Province, Deaths, Active, Date)
 jun_4 <- jun_3 %>% select(Province, Deaths, Active, Date)
 jul_4 <- jul_3 %>% select(Province, Deaths, Active, Date)
 aug_4 <- aug_3 %>% select(Province, Deaths, Active, Date)
-# sep_4 <- sep_3 %>% select(Province, Deaths, Active, Date)
+sep_4 <- sep_3 %>% select(Province, Deaths, Active, Date)
 
-dec_5 <- dec_4 %>% group_by(Province) %>% summarise(across(c(Deaths, Active), sum)) %>% mutate(Month = "Dec")
-jan_5 <- jan_4 %>% group_by(Province) %>% summarise(across(c(Deaths, Active), sum)) %>% mutate(Month = "Jan")
-feb_5 <- feb_4 %>% group_by(Province) %>% summarise(across(c(Deaths, Active), sum)) %>% mutate(Month = "Jan")
-mar_5 <- mar_4 %>% group_by(Province) %>% summarise(across(c(Deaths, Active), sum)) %>% mutate(Month = "Jan")
-apr_5 <- apr_4 %>% group_by(Province) %>% summarise(across(c(Deaths, Active), sum)) %>% mutate(Month = "Jan")
-may_5 <- may_4 %>% group_by(Province) %>% summarise(across(c(Deaths, Active), sum)) %>% mutate(Month = "Jan")
-jun_5 <- jun_4 %>% group_by(Province) %>% summarise(across(c(Deaths, Active), sum)) %>% mutate(Month = "Jan")
-jul_5 <- jul_4 %>% group_by(Province) %>% summarise(across(c(Deaths, Active), sum)) %>% mutate(Month = "Jan")
-aug_5 <- aug_4 %>% group_by(Province) %>% summarise(across(c(Deaths, Active), sum)) %>% mutate(Month = "Jan")
+data_1 <- rbind(jan_4, feb_4, mar_4, apr_4, may_4, jun_4, jul_4, aug_4, sep_4)
+data_2 <- rbind(dec_4, jan_4, feb_4, mar_4, apr_4, may_4, jun_4, jul_4, aug_4)
+
+data_11 <- data_1 %>% group_by(Province, Date) %>% summarise(across(c(Deaths, Active), sum))
+data_11
+data_22 <- data_2 %>% group_by(Province, Date) %>% summarise(across(c(Deaths, Active), sum))
+names(data_22) <- c("State", "Date2", "Deaths2", "Active2")
+mydata1 <- cbind(data_11, data_22)
+mydata1
+mydata2 <- mydata1 %>% mutate(Death = Deaths - Deaths2, Cases = Active - Active2, Total = Death + Cases, 
+                              Month = rep(c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"))) %>% 
+  select(State, Month, Death, Cases, Total)
+
+`%!in%` <- Negate(`%in%`)
+
+mydata3 <- mydata2 %>% filter(Province %!in% c("American Samoa", "Diamond Princess", "Grand Princess", "Guam", "Northern Mariana Islands", "Puerto Rico", "Virgin Islands")) %>% 
+  mutate(f500_deaths = if_else(Death < 500, "Less than 500 deaths", "More than 500 deaths"), 
+         Total_cases = if_else(Total < 9000, "1. Less than 9000", 
+                             if_else(Total < 30000, "2. Between 9000 and 30,000", "3. More than 30,000")), 
+         vaccine = if_else(Month %in% c("Jan", "Feb", "Mar", "Apr"), "1. Vaccine-ing", 
+                           if_else(Month %in% c("May", "Jun", "Jul"), "2. Some vaccined", "3. Back to school")))
+dim(mydata3)
+names(mydata3)
+# 1st contingency table
+table(mydata3$Total_cases, mydata3$vaccine)
+
+# 2nd contingency table
+mydata3 %>% filter(Province %in% c("California", "New York", "Florida", "Texas", "Michigan", "North Carolina")) %>% 
+  select(Province, Month, Death) %>%
+  pivot_wider(names_from = "Month", values_from = "Death") %>% arrange(desc(Jan))
+# 3rd contingency table
+mydata3 %>% filter(Province %in% c("California", "New York", "Florida", "Texas", "Michigan", "North Carolina")) %>% 
+  select(Province, Month, Total) %>%
+  pivot_wider(names_from = "Month", values_from = "Total") %>% arrange(desc(Jan))
+
+# summaries
+mydata3 %>% group_by(Province, vaccine) %>% 
+  summarise(avg_total = mean(Total), sd_total = sd(Total), median_total = median(Total), IQR_total = IQR(Total))
+
+mydata3 %>% group_by(Province, vaccine) %>% 
+  summarise(avg_death = mean(Death), sd_death = sd(Death), median_death = median(Death), IQR_death = IQR(Death))
+
+
+#dec_5 <- dec_4 %>% group_by(Province) %>% summarise(across(c(Deaths, Active), sum)) %>% mutate(Month = "Dec")
+#jan_5 <- jan_4 %>% group_by(Province) %>% summarise(across(c(Deaths, Active), sum)) %>% mutate(Month = "Jan")
+#feb_5 <- feb_4 %>% group_by(Province) %>% summarise(across(c(Deaths, Active), sum)) %>% mutate(Month = "Jan")
+#mar_5 <- mar_4 %>% group_by(Province) %>% summarise(across(c(Deaths, Active), sum)) %>% mutate(Month = "Jan")
+#apr_5 <- apr_4 %>% group_by(Province) %>% summarise(across(c(Deaths, Active), sum)) %>% mutate(Month = "Jan")
+#may_5 <- may_4 %>% group_by(Province) %>% summarise(across(c(Deaths, Active), sum)) %>% mutate(Month = "Jan")
+#jun_5 <- jun_4 %>% group_by(Province) %>% summarise(across(c(Deaths, Active), sum)) %>% mutate(Month = "Jan")
+#jul_5 <- jul_4 %>% group_by(Province) %>% summarise(across(c(Deaths, Active), sum)) %>% mutate(Month = "Jan")
+#aug_5 <- aug_4 %>% group_by(Province) %>% summarise(across(c(Deaths, Active), sum)) %>% mutate(Month = "Jan")
 
 #rbind(dec_5, jan_5)
 
 #Deaths <- jan_5$Deaths - dec_5$Deaths
 #Active <- jan_5$Active - dec_5$Active
 
-jan_6 <- data.frame(jan_5$Province, dec_5$Deaths - dec_5$Deaths, jan_5$Active - dec_5$Active, "Jan")
-feb_6 <- data.frame(feb_5$Province, jan_5$Deaths - dec_5$Deaths, feb_5$Active - jan_5$Active, "Feb")
-mar_6 <- data.frame(mar_5$Province, feb_5$Deaths - dec_5$Deaths, mar_5$Active - feb_5$Active, "Mar")
-apr_6 <- data.frame(apr_5$Province, mar_5$Deaths - dec_5$Deaths, apr_5$Active - mar_5$Active, "Apr")
-may_6 <- data.frame(may_5$Province, apr_5$Deaths - dec_5$Deaths, may_5$Active - apr_5$Active, "May")
-jun_6 <- data.frame(jun_5$Province, may_5$Deaths - dec_5$Deaths, jun_5$Active - may_5$Active, "Jun")
-jul_6 <- data.frame(jul_5$Province, jun_5$Deaths - dec_5$Deaths, jul_5$Active - jun_5$Active, "Jul")
-aug_6 <- data.frame(aug_5$Province, jul_5$Deaths - dec_5$Deaths, aug_5$Active - jul_5$Active, "Aug")
+#jan_6 <- data.frame(jan_5$Province, dec_5$Deaths - dec_5$Deaths, jan_5$Active - dec_5$Active, "Jan")
+#feb_6 <- data.frame(feb_5$Province, jan_5$Deaths - dec_5$Deaths, feb_5$Active - jan_5$Active, "Feb")
+#mar_6 <- data.frame(mar_5$Province, feb_5$Deaths - dec_5$Deaths, mar_5$Active - feb_5$Active, "Mar")
+#apr_6 <- data.frame(apr_5$Province, mar_5$Deaths - dec_5$Deaths, apr_5$Active - mar_5$Active, "Apr")
+#may_6 <- data.frame(may_5$Province, apr_5$Deaths - dec_5$Deaths, may_5$Active - apr_5$Active, "May")
+#jun_6 <- data.frame(jun_5$Province, may_5$Deaths - dec_5$Deaths, jun_5$Active - may_5$Active, "Jun")
+#jul_6 <- data.frame(jul_5$Province, jun_5$Deaths - dec_5$Deaths, jul_5$Active - jun_5$Active, "Jul")
+#aug_6 <- data.frame(aug_5$Province, jul_5$Deaths - dec_5$Deaths, aug_5$Active - jul_5$Active, "Aug")
 
-colnames(jan_6) <- c("State", "Deaths", "Cases", "Month")
-colnames(feb_6) <- c("State", "Deaths", "Cases", "Month")
-colnames(mar_6) <- c("State", "Deaths", "Cases", "Month")
-colnames(apr_6) <- c("State", "Deaths", "Cases", "Month")
-colnames(may_6) <- c("State", "Deaths", "Cases", "Month")
-colnames(jun_6) <- c("State", "Deaths", "Cases", "Month")
-colnames(jul_6) <- c("State", "Deaths", "Cases", "Month")
-colnames(aug_6) <- c("State", "Deaths", "Cases", "Month")
-rbind(jan_6, feb_6, mar_6, apr_6, may_6, jun_6, jul_6, aug_6)
+#colnames(jan_6) <- c("State", "Deaths", "Cases", "Month")
+#colnames(feb_6) <- c("State", "Deaths", "Cases", "Month")
+#colnames(mar_6) <- c("State", "Deaths", "Cases", "Month")
+#colnames(apr_6) <- c("State", "Deaths", "Cases", "Month")
+#colnames(may_6) <- c("State", "Deaths", "Cases", "Month")
+#colnames(jun_6) <- c("State", "Deaths", "Cases", "Month")
+#colnames(jul_6) <- c("State", "Deaths", "Cases", "Month")
+#colnames(aug_6) <- c("State", "Deaths", "Cases", "Month")
+#rbind(jan_6, feb_6, mar_6, apr_6, may_6, jun_6, jul_6, aug_6)
 
 
 ```
