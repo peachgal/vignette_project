@@ -135,6 +135,18 @@ mydata2 <- mydata1 %>% mutate(Death = Deaths - Deaths2, Cases = Active - Active2
     ## Adding missing grouping variables: `Province`
 
 ``` r
+write_csv(x = mydata2, path = "../_Data/covid_data.csv")
+```
+
+    ## Warning: The `path` argument of `write_csv()` is deprecated as of readr 1.4.0.
+    ## Please use the `file` argument instead.
+
+``` r
+write_csv(x = mosquitoFulldata, 
+          path = "C:/Users/peach/Documents/ST558/ST558_hw4_DataSources/mosquitoFulldata.csv")
+```
+
+``` r
 `%!in%` <- Negate(`%in%`)
 
 mydata3 <- mydata2 %>% filter(Province %!in% c("American Samoa", "Diamond Princess", "Grand Princess", "Guam", "Northern Mariana Islands", "Puerto Rico", "Virgin Islands")) %>% 
@@ -232,7 +244,7 @@ g + geom_bar(stat = "identity", position = "dodge") +
         title = element_text(size = 15))
 ```
 
-![](../images/unnamed-chunk-3-1.png)<!-- -->
+![](../images/unnamed-chunk-5-1.png)<!-- -->
 
 ``` r
 barplot2 <- summary4 %>% filter(Province %in% c("California", "New York", "Florida", "Texas", "Michigan", "North Carolina"))
@@ -249,7 +261,7 @@ d + geom_bar(stat = "identity", position = "dodge") +
         title = element_text(size = 15))
 ```
 
-![](../images/unnamed-chunk-3-2.png)<!-- -->
+![](../images/unnamed-chunk-5-2.png)<!-- -->
 
 ``` r
 # mydata3
@@ -268,7 +280,7 @@ boxplot1 + geom_boxplot(fill = "white", outlier.shape = NA) +
         title = element_text(size = 15))
 ```
 
-![](../images/unnamed-chunk-3-3.png)<!-- -->
+![](../images/unnamed-chunk-5-3.png)<!-- -->
 
 ``` r
 boxplot2 <- ggplot(data = mydata3, aes(x = vaccine, y = Death))
@@ -285,7 +297,7 @@ boxplot2 + geom_boxplot(fill = "white", outlier.shape = NA) +
         title = element_text(size = 15))
 ```
 
-![](../images/unnamed-chunk-3-4.png)<!-- -->
+![](../images/unnamed-chunk-5-4.png)<!-- -->
 
 ``` r
 scatter <- ggplot(data = mydata3, aes(x = Cases, y = Death, color = vaccine))
@@ -302,11 +314,11 @@ scatter + geom_point(aes(shape = Total_cases), size = 3) +
         title = element_text(size = 15))
 ```
 
-![](../images/unnamed-chunk-3-5.png)<!-- -->
+![](../images/unnamed-chunk-5-5.png)<!-- -->
 
 ``` r
-his <- ggplot(data = mydata3, aes(x = Total, color = vaccine))
-his + geom_histogram(binwidth = 10) + 
+his <- ggplot(data = mydata3, aes(x = Total, fill = vaccine))
+his + geom_histogram(aes(group = vaccine), binwidth = 5) + 
   coord_cartesian(xlim=c(0, 1000000)) + 
   labs(title = "Figure 6. Histogram of Total Cases via Timelines") + 
   theme(axis.text.x = element_text(size = 10), 
@@ -318,15 +330,16 @@ his + geom_histogram(binwidth = 10) +
         title = element_text(size = 15))
 ```
 
-![](../images/unnamed-chunk-3-6.png)<!-- -->
+![](../images/unnamed-chunk-5-6.png)<!-- -->
 
 ``` r
-mydata3$Month <- ordered(mydata3$Month, levels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"))
+# mydata3$Month <- ordered(mydata3$Month, levels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"))
+mydata3$Month <- factor(mydata3$Month, levels = unique(mydata3$Month))
 
 neighbor <- mydata3 %>% filter(State %in% c("North Carolina", "South Carolina", "Tennessee","Georgia", "Kentucky", "Virginia", "West Virginia"))
 lineplot1 <- ggplot(data = neighbor, aes(x = Month, y = Total, color = State))
 lineplot1 + geom_line(aes(group = State)) + geom_point() + 
-  labs(title = "Figure 7. Line plot of Total Cases of NC and its neighbors") + 
+  labs(title = "Figure 7. Line plot: Total cases of NC and its neighbors") + 
   theme(axis.text.x = element_text(size = 10), 
         axis.text.y = element_text(size = 10), 
         axis.title.x = element_text(size = 15), 
@@ -336,12 +349,12 @@ lineplot1 + geom_line(aes(group = State)) + geom_point() +
         title = element_text(size = 15))
 ```
 
-![](../images/unnamed-chunk-3-7.png)<!-- -->
+![](../images/unnamed-chunk-5-7.png)<!-- -->
 
 ``` r
 lineplot1 <- ggplot(data = neighbor, aes(x = Month, y = Death, color = State))
 lineplot1 + geom_line(aes(group = State)) + geom_point() + 
-  labs(title = "Figure 8. Line plot of Total Deaths of NC and its neighbors") + 
+  labs(title = "Figure 8. Line plot: Total deaths of NC and its neighbors") + 
   theme(axis.text.x = element_text(size = 10), 
         axis.text.y = element_text(size = 10), 
         axis.title.x = element_text(size = 15), 
@@ -351,7 +364,7 @@ lineplot1 + geom_line(aes(group = State)) + geom_point() +
         title = element_text(size = 15))
 ```
 
-![](../images/unnamed-chunk-3-8.png)<!-- -->
+![](../images/unnamed-chunk-5-8.png)<!-- -->
 
 ``` r
 #d <- ggplot(data = crabs, aes(x = spine))
