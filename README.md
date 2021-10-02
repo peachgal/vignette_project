@@ -10,6 +10,14 @@ Jasmine Wang
     -   [Support or Contact](#support-or-contact)
 -   [R Markdown](#r-markdown)
 
+``` r
+rmarkdown::render("C:/Users/peach/Documents/ST558/ST558_repos/vignette_project/_Rmd/README.Rmd", 
+                  output_format = "github_document", 
+                  output_dir = "C:/Users/peach/documents/ST558/ST558_repos/vignette_project/_posts", 
+                  output_options = list(html_preview = FALSE, toc = TRUE, df_print = "tibble")
+                  )
+```
+
 ## Getting an API
 
 ``` r
@@ -193,90 +201,186 @@ mydata3 %>% filter(Province %in% c("California", "New York", "Florida", "Texas",
 
 ``` r
 # summaries
-mydata3 %>% group_by(Province, vaccine) %>% 
-  summarise(avg_total = mean(Total), sd_total = sd(Total), median_total = median(Total), IQR_total = IQR(Total))
+summary3 <- mydata3 %>% group_by(Province, vaccine) %>% 
+  summarise(avg_total = round(mean(Total)), sd_total = round(sd(Total)), median_total = round(median(Total)), IQR_total = round(IQR(Total)))
 ```
 
     ## `summarise()` has grouped output by 'Province'. You can override using the `.groups` argument.
 
-    ## # A tibble: 156 x 6
-    ##    Province  vaccine           avg_total sd_total median_total IQR_total
-    ##    <chr>     <chr>                 <dbl>    <dbl>        <dbl>     <dbl>
-    ##  1 ""        1. Vaccine-ing     3062630. 2074250.     2143880.  1471063.
-    ##  2 ""        2. Some vaccined    875972.  459495.      916822    458132.
-    ##  3 ""        3. Back to school  4240674.   28285.     4240674.    20000.
-    ##  4 "Alabama" 1. Vaccine-ing       41674    38795.       27874.    30078.
-    ##  5 "Alabama" 2. Some vaccined     19228.   13907.       15483     13523 
-    ##  6 "Alabama" 3. Back to school   105434    12287.      105434      8688 
-    ##  7 "Alaska"  1. Vaccine-ing        5284.    1468.        4926      1329 
-    ##  8 "Alaska"  2. Some vaccined      2446     1607.        2060      1572 
-    ##  9 "Alaska"  3. Back to school    19590.    9233.       19590.     6528.
-    ## 10 "Arizona" 1. Vaccine-ing       85572.  103133.       41704.    79390.
-    ## # ... with 146 more rows
-
 ``` r
-mydata3 %>% group_by(Province, vaccine) %>% 
+summary4 <- mydata3 %>% group_by(Province, vaccine) %>% 
   summarise(avg_death = mean(Death), sd_death = sd(Death), median_death = median(Death), IQR_death = IQR(Death))
 ```
 
     ## `summarise()` has grouped output by 'Province'. You can override using the `.groups` argument.
 
-    ## # A tibble: 156 x 6
-    ##    Province  vaccine           avg_death sd_death median_death IQR_death
-    ##    <chr>     <chr>                 <dbl>    <dbl>        <dbl>     <dbl>
-    ##  1 ""        1. Vaccine-ing      56028.  32502.         51564.   39440. 
-    ##  2 ""        2. Some vaccined    12413.   5052.         10327     4718. 
-    ##  3 ""        3. Back to school   42250.  20395.         42250.   14422. 
-    ##  4 "Alabama" 1. Vaccine-ing       1517.   1226.          1433     1842. 
-    ##  5 "Alabama" 2. Some vaccined      213.     33.6          206       33  
-    ##  6 "Alabama" 3. Back to school    1382.    897.          1382.     634. 
-    ##  7 "Alaska"  1. Vaccine-ing         35.2    14.5           31       12.8
-    ##  8 "Alaska"  2. Some vaccined       14       7.21          12        7  
-    ##  9 "Alaska"  3. Back to school      94      55.2           94       39  
-    ## 10 "Arizona" 1. Vaccine-ing       2115    1780.          1924.    2380. 
-    ## # ... with 146 more rows
-
 ``` r
-#dec_5 <- dec_4 %>% group_by(Province) %>% summarise(across(c(Deaths, Active), sum)) %>% mutate(Month = "Dec")
-#jan_5 <- jan_4 %>% group_by(Province) %>% summarise(across(c(Deaths, Active), sum)) %>% mutate(Month = "Jan")
-#feb_5 <- feb_4 %>% group_by(Province) %>% summarise(across(c(Deaths, Active), sum)) %>% mutate(Month = "Jan")
-#mar_5 <- mar_4 %>% group_by(Province) %>% summarise(across(c(Deaths, Active), sum)) %>% mutate(Month = "Jan")
-#apr_5 <- apr_4 %>% group_by(Province) %>% summarise(across(c(Deaths, Active), sum)) %>% mutate(Month = "Jan")
-#may_5 <- may_4 %>% group_by(Province) %>% summarise(across(c(Deaths, Active), sum)) %>% mutate(Month = "Jan")
-#jun_5 <- jun_4 %>% group_by(Province) %>% summarise(across(c(Deaths, Active), sum)) %>% mutate(Month = "Jan")
-#jul_5 <- jul_4 %>% group_by(Province) %>% summarise(across(c(Deaths, Active), sum)) %>% mutate(Month = "Jan")
-#aug_5 <- aug_4 %>% group_by(Province) %>% summarise(across(c(Deaths, Active), sum)) %>% mutate(Month = "Jan")
+library(tidyverse)
+library(ggplot2)
 
-#rbind(dec_5, jan_5)
-
-#Deaths <- jan_5$Deaths - dec_5$Deaths
-#Active <- jan_5$Active - dec_5$Active
-
-#jan_6 <- data.frame(jan_5$Province, dec_5$Deaths - dec_5$Deaths, jan_5$Active - dec_5$Active, "Jan")
-#feb_6 <- data.frame(feb_5$Province, jan_5$Deaths - dec_5$Deaths, feb_5$Active - jan_5$Active, "Feb")
-#mar_6 <- data.frame(mar_5$Province, feb_5$Deaths - dec_5$Deaths, mar_5$Active - feb_5$Active, "Mar")
-#apr_6 <- data.frame(apr_5$Province, mar_5$Deaths - dec_5$Deaths, apr_5$Active - mar_5$Active, "Apr")
-#may_6 <- data.frame(may_5$Province, apr_5$Deaths - dec_5$Deaths, may_5$Active - apr_5$Active, "May")
-#jun_6 <- data.frame(jun_5$Province, may_5$Deaths - dec_5$Deaths, jun_5$Active - may_5$Active, "Jun")
-#jul_6 <- data.frame(jul_5$Province, jun_5$Deaths - dec_5$Deaths, jul_5$Active - jun_5$Active, "Jul")
-#aug_6 <- data.frame(aug_5$Province, jul_5$Deaths - dec_5$Deaths, aug_5$Active - jul_5$Active, "Aug")
-
-#colnames(jan_6) <- c("State", "Deaths", "Cases", "Month")
-#colnames(feb_6) <- c("State", "Deaths", "Cases", "Month")
-#colnames(mar_6) <- c("State", "Deaths", "Cases", "Month")
-#colnames(apr_6) <- c("State", "Deaths", "Cases", "Month")
-#colnames(may_6) <- c("State", "Deaths", "Cases", "Month")
-#colnames(jun_6) <- c("State", "Deaths", "Cases", "Month")
-#colnames(jul_6) <- c("State", "Deaths", "Cases", "Month")
-#colnames(aug_6) <- c("State", "Deaths", "Cases", "Month")
-#rbind(jan_6, feb_6, mar_6, apr_6, may_6, jun_6, jul_6, aug_6)
+barplot1 <- summary3 %>% filter(Province %in% c("California", "New York", "Florida", "Texas", "Michigan", "North Carolina"))
+g <- ggplot(data = barplot1, aes(x = Province, y = avg_total, fill = vaccine))
+g + geom_bar(stat = "identity", position = "dodge") + 
+  labs(x = "State", y = "Average Total Cases", title = "Figure 1. Average total cases at each timeline for each state") + 
+  scale_fill_discrete(name = "Vaccine timeline") + 
+  theme(axis.text.x = element_text(angle = 45, size = 10), 
+        axis.text.y = element_text(size = 10), 
+        axis.title.x = element_text(size = 13), 
+        axis.title.y = element_text(size = 13), 
+        legend.key.size = unit(1, 'cm'), 
+        legend.text = element_text(size = 13), 
+        title = element_text(size = 15))
 ```
 
+![](../images/unnamed-chunk-3-1.png)<!-- -->
+
 ``` r
-rmarkdown::render("C:/Users/peach/Documents/ST558/ST558_repos/vignette_project/_Rmd/README.Rmd", output_format = "github_document", 
-                  output_dir = "C:/Users/peach/documents/ST558/ST558_repos/vignette_project/_posts", 
-                  output_options = list(html_preview = FALSE)
-                  )
+barplot2 <- summary4 %>% filter(Province %in% c("California", "New York", "Florida", "Texas", "Michigan", "North Carolina"))
+d <- ggplot(data = barplot2, aes(x = Province, y = avg_death, fill = vaccine))
+d + geom_bar(stat = "identity", position = "dodge") + 
+  labs(x = "State", y = "Average Total Cases", title = "Figure 2. Average total deaths at each timeline for each state") + 
+  scale_fill_discrete(name = "Vaccine timeline") + 
+  theme(axis.text.x = element_text(angle = 45, size = 10), 
+        axis.text.y = element_text(size = 10), 
+        axis.title.x = element_text(size = 13), 
+        axis.title.y = element_text(size = 13), 
+        legend.key.size = unit(1, 'cm'), 
+        legend.text = element_text(size = 13), 
+        title = element_text(size = 15))
+```
+
+![](../images/unnamed-chunk-3-2.png)<!-- -->
+
+``` r
+# mydata3
+
+boxplot1 <- ggplot(data = mydata3, aes(x = vaccine, y = Total))
+boxplot1 + geom_boxplot(fill = "white", outlier.shape = NA) + 
+  coord_cartesian(ylim=c(0, 300000)) + 
+  geom_jitter(aes(color = vaccine), size = 3) + 
+  labs(title = "Figure 3. Boxplot for total number of cases") + 
+  theme(axis.text.x = element_text(size = 10), 
+        axis.text.y = element_text(size = 10), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15), 
+        legend.key.size = unit(1, 'cm'), 
+        legend.text = element_text(size = 13), 
+        title = element_text(size = 15))
+```
+
+![](../images/unnamed-chunk-3-3.png)<!-- -->
+
+``` r
+boxplot2 <- ggplot(data = mydata3, aes(x = vaccine, y = Death))
+boxplot2 + geom_boxplot(fill = "white", outlier.shape = NA) + 
+  coord_cartesian(ylim=c(0, 10000)) + 
+  geom_jitter(aes(color = vaccine), size = 3) + 
+  labs(title = "Figure 4. Boxplot for total number of deaths") + 
+  theme(axis.text.x = element_text(size = 10), 
+        axis.text.y = element_text(size = 10), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15), 
+        legend.key.size = unit(1, 'cm'), 
+        legend.text = element_text(size = 13), 
+        title = element_text(size = 15))
+```
+
+![](../images/unnamed-chunk-3-4.png)<!-- -->
+
+``` r
+scatter <- ggplot(data = mydata3, aes(x = Cases, y = Death, color = vaccine))
+scatter + geom_point(aes(shape = Total_cases), size = 3) + 
+  coord_cartesian(xlim=c(0, 1000000), ylim=c(0, 20000)) +
+  geom_smooth(method = lm, lwd = 2) + 
+  labs(title = "Figure 5. Scappterplot: Number of cases vs Deaths") + 
+  theme(axis.text.x = element_text(size = 10), 
+        axis.text.y = element_text(size = 10), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15), 
+        legend.key.size = unit(1, 'cm'), 
+        legend.text = element_text(size = 13), 
+        title = element_text(size = 15))
+```
+
+![](../images/unnamed-chunk-3-5.png)<!-- -->
+
+``` r
+his <- ggplot(data = mydata3, aes(x = Total, color = vaccine))
+his + geom_histogram(binwidth = 10) + 
+  coord_cartesian(xlim=c(0, 1000000)) + 
+  labs(title = "Figure 6. Histogram of Total Cases via Timelines") + 
+  theme(axis.text.x = element_text(size = 10), 
+        axis.text.y = element_text(size = 10), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15), 
+        legend.key.size = unit(1, 'cm'), 
+        legend.text = element_text(size = 13), 
+        title = element_text(size = 15))
+```
+
+![](../images/unnamed-chunk-3-6.png)<!-- -->
+
+``` r
+mydata3$Month <- ordered(mydata3$Month, levels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"))
+
+neighbor <- mydata3 %>% filter(State %in% c("North Carolina", "South Carolina", "Tennessee","Georgia", "Kentucky", "Virginia", "West Virginia"))
+lineplot1 <- ggplot(data = neighbor, aes(x = Month, y = Total, color = State))
+lineplot1 + geom_line(aes(group = State)) + geom_point() + 
+  labs(title = "Figure 7. Line plot of Total Cases of NC and its neighbors") + 
+  theme(axis.text.x = element_text(size = 10), 
+        axis.text.y = element_text(size = 10), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15), 
+        legend.key.size = unit(1, 'cm'), 
+        legend.text = element_text(size = 13), 
+        title = element_text(size = 15))
+```
+
+![](../images/unnamed-chunk-3-7.png)<!-- -->
+
+``` r
+lineplot1 <- ggplot(data = neighbor, aes(x = Month, y = Death, color = State))
+lineplot1 + geom_line(aes(group = State)) + geom_point() + 
+  labs(title = "Figure 8. Line plot of Total Deaths of NC and its neighbors") + 
+  theme(axis.text.x = element_text(size = 10), 
+        axis.text.y = element_text(size = 10), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15), 
+        legend.key.size = unit(1, 'cm'), 
+        legend.text = element_text(size = 13), 
+        title = element_text(size = 15))
+```
+
+![](../images/unnamed-chunk-3-8.png)<!-- -->
+
+``` r
+#d <- ggplot(data = crabs, aes(x = spine))
+#d + geom_bar(aes(fill = as.factor(y)), position = "dodge") + 
+#  labs(x = "Female Crab Spine Condition", 
+#       title = "Figure 2. Female Crab Spine Condition vs. Satellite Count") + 
+#  scale_fill_discrete(name = NULL) + 
+#  theme(axis.text.x = element_text(size = 10), 
+#        axis.text.y = element_text(size = 10), 
+#        axis.title.x = element_text(size = 15), 
+#        axis.title.y = element_text(size = 15), 
+#        legend.key.size = unit(1, 'cm'), 
+#        legend.text = element_text(size = 13), 
+#        title = element_text(size = 12))
+
+
+#p <- ggplot(data = crabs, aes(x = spine))
+#p + geom_bar(aes(fill = as.factor(color)), position = "dodge") + 
+#  labs(x = "Female Crab Spine Condition", 
+#       title = "Figure. 3 Female Crab Spine Condition vs. Female Crab Color") + 
+#  scale_fill_discrete(name = "Female Crab Color") + 
+#  theme(axis.text.x = element_text(size = 10), 
+#        axis.text.y = element_text(size = 10), 
+#        axis.title.x = element_text(size = 15), 
+#        axis.title.y = element_text(size = 15), 
+#        legend.key.size = unit(1, 'cm'), 
+#        legend.title = element_text(size = 15), 
+#        legend.text = element_text(size = 13), 
+#        title = element_text(size = 12))
 ```
 
 ## Welcome to GitHub Pages
