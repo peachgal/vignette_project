@@ -83,24 +83,83 @@ get_api <- function(name, country, status, vintage_from, vintage_to, time_from =
   #return(something3)
 }
 
+########## First option ########################################################
+first_op <- function(input1, ...){
+  
+  input <- tolower(input1, ...) 
+  option <- c("summary", "countries")
+  num <- charmatch(input, option, ...)
+  
+  if(is.na(num)) {
+    
+    print("Sorry mate, your input is not valid here! Please choose another one.")
+    
+  } else {
+    
+    status_string <- option[num]
+    status_string
+  }
+}
 
+first_op("su")
+```
 
+    ## [1] "summary"
+
+``` r
+first_op("co")
+```
+
+    ## [1] "countries"
+
+``` r
+######## Status function #########################################################
+status <- function(input1){
+  
+  input <- tolower(input1)
+  option <- c("confirmed", "recovered", "deaths")
+  num <- charmatch(input, option)
+  
+  if(is.na(num)) {
+    
+    print("Sorry mate, your input is not valid here! Please choose another one.")
+    
+    
+  } else {
+    
+    status_string <- paste("status", option[num], sep="/")
+    status_string
+  }
+}
+
+status("COM")
+```
+
+    ## [1] "Sorry mate, your input is not valid here! Please choose another one."
+
+``` r
 ####### Country function ##################################################
 country <- function(nation, ...){
   
-  if(nchar(nation) > 3) {
-    
-    
-    nation_name <- if_else(grepl(" ", nation, ignore.case = TRUE), tolower(sub(" ", "-", nation)), tolower(nation))
-    nation_name
-    
-  } else {
+  if(nchar(nation) == 3) {
     
     nation_name <- countrycode(as.character(nation), origin = "iso3c", destination = "country.name")
     nation_name <- if_else(grepl(" ", nation_name, ignore.case = TRUE), tolower(sub(" ", "-", nation_name)), tolower(nation_name))
     nation_name
+    
+  } else if(nchar(nation) == 2) {
+    
+    nation_name <- countrycode(as.character(nation), origin = "iso2c", destination = "country.name")
+    nation_name <- if_else(grepl(" ", nation_name, ignore.case = TRUE), tolower(sub(" ", "-", nation_name)), tolower(nation_name))
+    nation_name
+  } else {
+    
+    nation_name <- if_else(grepl(" ", nation, ignore.case = TRUE), tolower(sub(" ", "-", nation)), tolower(nation))
+    nation_name
   }
 }
+
+
 
 ##### Date function ########################################################
 date_1 <- function(date){
