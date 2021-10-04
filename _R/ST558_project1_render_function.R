@@ -9,7 +9,7 @@
 
 rmarkdown::render("C:/Users/peach/Documents/ST558/ST558_repos/vignette_project/_Rmd/ST558_vignette_proj.Rmd", 
                   output_format = "github_document", 
-                  output_file = "C:/Users/peach/documents/ST558/ST558_repos/vignette_project/README.md", 
+                  output_file = "C:/Users/peach/documents/ST558/ST558_repos/vignette_project/_README/README.md", 
                   output_options = list(html_preview = FALSE, toc = TRUE, df_print = "tibble")
 )
 

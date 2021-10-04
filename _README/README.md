@@ -1,19 +1,21 @@
----
-title: "ST558 - Vignette Project - Covid-19 Data"
-author: "Jasmine Wang"
-date: "10/05/2021"
-output: 
-  html_document:
-    toc: yes
-    df_print: "paged"
----
+ST558 - Vignette Project - Covid-19 Data
+================
+Jasmine Wang
+10/05/2021
 
-```{r setup, message=FALSE, warning=FALSE}
+-   [Writing Functions](#writing-functions)
+-   [Getting an API](#getting-an-api)
+-   [Welcome to GitHub Pages](#welcome-to-github-pages)
+    -   [Markdown](#markdown)
+    -   [Jekyll Themes](#jekyll-themes)
+    -   [Support or Contact](#support-or-contact)
+-   [R Markdown](#r-markdown)
+
+``` r
 knitr::opts_chunk$set(fig.path = "../images/")
 ```
 
-
-```{r eval = FALSE, warning=FALSE, message=FALSE}
+``` r
 rmarkdown::render("C:/Users/peach/Documents/ST558/ST558_repos/vignette_project/_Rmd/ST558_vignette_proj.Rmd", 
                   output_format = "github_document", 
                   output_file = "C:/Users/peach/documents/ST558/ST558_repos/vignette_project/_README/README.md", 
@@ -23,7 +25,7 @@ rmarkdown::render("C:/Users/peach/Documents/ST558/ST558_repos/vignette_project/_
 
 ## Writing Functions
 
-```{r eval=TRUE}
+``` r
 library(httr)
 library(jsonlite)
 library(tidyverse)
@@ -133,7 +135,7 @@ date_1 <- function(date){
 
 ## Getting an API
 
-```{r eval=FALSE}
+``` r
 library(httr)
 library(jsonlite)
 library(tidyverse)
@@ -198,12 +200,9 @@ mydata2 <- mydata1 %>% mutate(Death = Deaths - Deaths2, Cases = Active - Active2
   select(State, Month, Death, Cases, Total)
 
 write_csv(x = mydata2, path = "../_Data/covid_data.csv")
-
 ```
 
-
-
-```{r eval=FALSE}
+``` r
 `%!in%` <- Negate(`%in%`)
 
 mydata3 <- mydata2 %>% filter(Province %!in% c("American Samoa", "Diamond Princess", "Grand Princess", "Guam", "Northern Mariana Islands", "Puerto Rico", "Virgin Islands")) %>% 
@@ -232,11 +231,9 @@ summary3 <- mydata3 %>% group_by(Province, vaccine) %>%
 
 summary4 <- mydata3 %>% group_by(Province, vaccine) %>% 
   summarise(avg_death = mean(Death), sd_death = sd(Death), median_death = median(Death), IQR_death = IQR(Death))
-
 ```
 
-
-```{r eval=FALSE}
+``` r
 library(tidyverse)
 library(ggplot2)
 
@@ -344,22 +341,24 @@ lineplot1 + geom_line(aes(group = State)) + geom_point() +
         legend.key.size = unit(1, 'cm'), 
         legend.text = element_text(size = 13), 
         title = element_text(size = 15))
-
 ```
-
-
 
 ## Welcome to GitHub Pages
 
-You can use the [editor on GitHub](https://github.com/peachgal/vignette_project/edit/main/README.md) to maintain and preview the content for your website in Markdown files.
+You can use the [editor on
+GitHub](https://github.com/peachgal/vignette_project/edit/main/README.md)
+to maintain and preview the content for your website in Markdown files.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+Whenever you commit to this repository, GitHub Pages will run
+[Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from
+the content in your Markdown files.
 
 ### Markdown
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+Markdown is a lightweight and easy-to-use syntax for styling your
+writing. It includes conventions for
 
-```markdown
+``` markdown
 Syntax highlighted code block
 
 # Header 1
@@ -377,19 +376,30 @@ Syntax highlighted code block
 [Link](url) and ![Image](src)
 ```
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+For more details see [GitHub Flavored
+Markdown](https://guides.github.com/features/mastering-markdown/).
 
 ### Jekyll Themes
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/peachgal/vignette_project/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+Your Pages site will use the layout and styles from the Jekyll theme you
+have selected in your [repository
+settings](https://github.com/peachgal/vignette_project/settings/pages).
+The name of this theme is saved in the Jekyll `_config.yml`
+configuration file.
 
 ### Support or Contact
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+Having trouble with Pages? Check out our
+[documentation](https://docs.github.com/categories/github-pages-basics/)
+or [contact support](https://support.github.com/contact) and we’ll help
+you sort it out.
 
 ## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+This is an R Markdown document. Markdown is a simple formatting syntax
+for authoring HTML, PDF, and MS Word documents. For more details on
+using R Markdown see <http://rmarkdown.rstudio.com>.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
+When you click the **Knit** button a document will be generated that
+includes both content as well as the output of any embedded R code
+chunks within the document. You can embed an R code chunk like this:
