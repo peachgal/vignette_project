@@ -190,11 +190,226 @@ pre code {
 <pre class="r"><code>knitr::opts_chunk$set(fig.path = &quot;../images/&quot;)</code></pre>
 <pre class="r"><code>rmarkdown::render(&quot;C:/Users/peach/Documents/ST558/ST558_repos/vignette_project/_Rmd/ST558_vignette_proj.Rmd&quot;, 
                   output_format = &quot;github_document&quot;, 
-                  output_file = &quot;C:/Users/peach/documents/ST558/ST558_repos/vignette_project/README.md&quot;, 
+                  output_file = &quot;C:/Users/peach/documents/ST558/ST558_repos/vignette_project/_README/README.md&quot;, 
                   output_options = list(html_preview = FALSE, toc = TRUE, df_print = &quot;tibble&quot;)
 )</code></pre>
 <div id="writing-functions" class="section level2">
 <h2>Writing Functions</h2>
+<pre class="r"><code>library(httr)
+library(jsonlite)
+library(tidyverse)
+library(countrycode)
+
+
+
+
+
+
+get_api &lt;- function(name, country, status, vintage_from, vintage_to, time_from = &quot;00:00:00&quot;, time_to = &quot;00:00:00&quot;){
+  
+  base_url &lt;- &quot;https://api.covid19api.com&quot;
+  
+  if(!is.null(name)) {
+    
+    api_url &lt;- paste(base_url, tolower(name), sep = &quot;/&quot;)
+  }
+  else if(!is.null(country)) {
+    
+    country_name &lt;- if_else(grepl(&quot; &quot;, country, ignore.case = TRUE), tolower(sub(&quot; &quot;, &quot;-&quot;, country)), tolower(country))
+    
+    api_url &lt;- paste(base_url, &quot;country&quot;, country_name, sep = &quot;/&quot;)
+    
+    if(!is.null(status)) {
+      
+      status_name &lt;- tolower(status)
+      
+      if(!is.nul(vintage_from) &amp; !is.null(vintage_to)) {
+        
+        x &lt;- parse_date_time(&quot;05/25/2017&quot;, orders = &quot;mdy&quot;)
+        x &lt;- as.Date(x)
+        print(x)
+        
+        
+        
+        date_n_time &lt;- paste0(&quot;?&quot;, &quot;from=&quot;, vintage_from, &quot;T&quot;, time_from, &quot;Z&amp;to=&quot;, vintage_to, &quot;T&quot;, time_to, &quot;Z&quot;)
+        
+        
+      }
+      api_url &lt;- paste0(base_url, &quot;status&quot;, &quot;/&quot;, status_name, &quot;?&quot;)
+      
+      
+    }
+  }
+  
+  #status = comfirmed, recovered deaths
+  
+  
+  api_url
+  
+  #something1 &lt;- GET()
+  #something2 &lt;- rawToChar(something1$content)
+  #something3 &lt;- fromJSON(something2)
+  #return(something3)
+}
+
+########## First option ########################################################
+first_op &lt;- function(input1, ...){
+  
+  input &lt;- tolower(input1, ...) 
+  option &lt;- c(&quot;summary&quot;, &quot;countries&quot;)
+  num &lt;- charmatch(input, option, ...)
+  
+  if(is.na(num)) {
+    
+    print(&quot;Sorry mate, your input is not valid here! Please choose another one.&quot;)
+    
+  } else {
+    
+    status_string &lt;- option[num]
+    status_string
+  }
+}
+
+first_op(&quot;su&quot;)
+first_op(&quot;co&quot;)
+
+######## Status function #########################################################
+status &lt;- function(input1){
+  
+  input &lt;- tolower(input1)
+  option &lt;- c(&quot;confirmed&quot;, &quot;recovered&quot;, &quot;deaths&quot;)
+  num &lt;- charmatch(input, option)
+  
+  if(is.na(num)) {
+    
+    print(&quot;Sorry mate, your input is not valid here! Please choose another one.&quot;)
+    
+    
+  } else {
+    
+    status_string &lt;- paste(&quot;status&quot;, option[num], sep=&quot;/&quot;)
+    status_string
+  }
+}
+
+status(&quot;COM&quot;)
+
+####### Country function ##################################################
+country &lt;- function(nation, ...){
+  
+  if(nchar(nation) == 3) {
+    
+    nation_name &lt;- countrycode(as.character(nation), origin = &quot;iso3c&quot;, destination = &quot;country.name&quot;)
+    nation_name &lt;- if_else(grepl(&quot; &quot;, nation_name, ignore.case = TRUE), tolower(sub(&quot; &quot;, &quot;-&quot;, nation_name)), tolower(nation_name))
+    nation_name
+    
+  } else if(nchar(nation) == 2) {
+    
+    nation_name &lt;- countrycode(as.character(nation), origin = &quot;iso2c&quot;, destination = &quot;country.name&quot;)
+    nation_name &lt;- if_else(grepl(&quot; &quot;, nation_name, ignore.case = TRUE), tolower(sub(&quot; &quot;, &quot;-&quot;, nation_name)), tolower(nation_name))
+    nation_name
+  } else {
+    
+    nation_name &lt;- if_else(grepl(&quot; &quot;, nation, ignore.case = TRUE), tolower(sub(&quot; &quot;, &quot;-&quot;, nation)), tolower(nation))
+    nation_name
+  }
+}
+##### Date function ########################################################
+date_1 &lt;- function(date){
+  
+  y &lt;- c(date) #, &quot;04-16-2016&quot;)
+  y &lt;- as_tibble(y)
+  
+  if(grepl(&quot;/&quot;, y$value, ignore.case = TRUE)){
+    
+    temp &lt;- y %&gt;% separate(value, c(&quot;first&quot;, &quot;second&quot;, &quot;third&quot;), sep=&quot;/&quot;)
+    
+  } else {
+    
+    temp &lt;- y %&gt;% separate(value, c(&quot;first&quot;, &quot;second&quot;, &quot;third&quot;), sep=&quot;-&quot;)
+    
+  }
+  if(nchar(temp$first) == 4){
+    
+    temp &lt;- unite(temp, date, first, second, third, sep=&quot;-&quot;, remove = TRUE)
+    temp$date
+    
+  } else {
+    
+    temp &lt;- unite(temp, date, first, second, third, sep=&quot;-&quot;, remove = TRUE)
+    temp$date &lt;- mdy(temp$date)
+    temp$date  
+  }
+}
+
+########### Time function ##########################################################
+time_input &lt;- function(input1){
+  
+  times &lt;- input1
+  times &lt;- as_tibble(times)
+  
+  if(grepl(&quot;:&quot;, times$value, ignore.case = TRUE)) {
+    
+    times &lt;- times %&gt;% separate(value, c(&quot;first&quot;, &quot;second&quot;, &quot;third&quot;), sep=&quot;:&quot;)
+    
+  } else if(grepl(&quot;-&quot;, times$value, ignore.case = TRUE)) {
+    
+    times &lt;- times %&gt;% separate(value, c(&quot;first&quot;, &quot;second&quot;, &quot;third&quot;), sep=&quot;-&quot;)
+    
+  } else if(grepl(&quot;/&quot;, times$value, ignore.case = TRUE)) {
+    
+    times &lt;- times %&gt;% separate(value, c(&quot;first&quot;, &quot;second&quot;, &quot;third&quot;), sep=&quot;/&quot;)
+    
+  }
+  
+  if(nchar(times$first) == 1){
+    
+    times$first &lt;- paste0(&quot;0&quot;, times$first)
+    
+    if(nchar(times$second) == 1){
+      
+      times$second &lt;- paste0(&quot;0&quot;, times$second)
+      
+      if(nchar(times$third) == 1){
+        
+        times$third &lt;- paste0(&quot;0&quot;, times$third)
+        
+      }
+    }
+  }
+  
+  if(as.numeric(times$first) %in% c(0:23)){
+    
+    if(as.numeric(times$second) %in% c(0:59)){
+      
+      if(as.numeric(times$third) %in% c(0:59)){
+        
+        
+        times &lt;- unite(times, value, first, second, third, sep=&quot;:&quot;, remove = TRUE)
+        times$value
+        
+      } else {
+        
+        print(&quot;Sorry mate, your input is not valid! Please choose a time between 0 and 59 seconds.&quot;)
+        
+      }
+    } else {
+      
+      print(&quot;Sorry mate, your input is not valid! Please choose a time between 0 and 59 minutes.&quot;)
+      
+    }
+  } else {
+    
+    print(&quot;Sorry mate, your input is not valid! Please choose a military time between 0 and 23 hours.&quot;)
+    
+  }
+}
+
+time_input(&quot;23-34-56&quot;)
+time_input(&quot;5/3/23&quot;)</code></pre>
+</div>
+<div id="getting-an-api" class="section level2">
+<h2>Getting an API</h2>
 <pre class="r"><code>library(httr)
 library(jsonlite)</code></pre>
 <pre><code>## Warning: package &#39;jsonlite&#39; was built under R version 4.0.5</code></pre>
@@ -215,37 +430,16 @@ library(jsonlite)</code></pre>
 ## x dplyr::filter()  masks stats::filter()
 ## x purrr::flatten() masks jsonlite::flatten()
 ## x dplyr::lag()     masks stats::lag()</code></pre>
-<pre class="r"><code>get_api &lt;- function(name = NULL, country, vintage_from = &quot; &quot;, vintage_to = &quot; &quot;, time_from = &quot;00:00:00&quot;, time_to = &quot;23:59:59&quot;){
-  
-  base_url &lt;- &quot;https://api.covid19api.com&quot;
-  
-  if(!is.null(name)) {
-    
-    api_url &lt;- paste(base_url, tolower(name), sep = &quot;/&quot;)
-  }
-  else if(!is.null(country)) {
-    
-    country_name &lt;- if_else(grepl(&quot; &quot;, country, ignore.case = TRUE), tolower(sub(&quot; &quot;, &quot;_&quot;, country)), tolower(country))
-    api_url &lt;- paste(base_url, &quot;country&quot;, country_name, sep = &quot;/&quot;)
-  }
-  
-  #status = comfirmed, recovered deaths
-  
-  
-  api_url
-  
-  #something1 &lt;- GET()
-  #something2 &lt;- rawToChar(something1$content)
-  #something3 &lt;- fromJSON(something2)
-  #return(something3)
-}
+<pre class="r"><code>dec_1 &lt;- GET(&quot;https://api.covid19api.com/country/united-states/team/north-carolina?from=2020-12-31T00:00:00Z&amp;to=2020-12-31T23:59:59Z&quot;)
 
-#get_api(name = &quot;summary&quot;)
-get_api(country = &quot;UniteD States&quot;)</code></pre>
-<pre><code>## [1] &quot;https://api.covid19api.com/country/united_states&quot;</code></pre>
-</div>
-<div id="getting-an-api" class="section level2">
-<h2>Getting an API</h2>
+dec_2 &lt;- rawToChar(dec_1$content)
+
+dec_3 &lt;- fromJSON(dec_2)
+
+head(dec_3)</code></pre>
+<pre><code>## $message
+## [1] &quot;Not Found&quot;</code></pre>
+<pre class="r"><code>#dec_4 &lt;- dec_3 %&gt;% select(Province, Deaths, Active, Date) </code></pre>
 <pre class="r"><code>library(httr)
 library(jsonlite)
 library(tidyverse)
@@ -444,34 +638,7 @@ lineplot1 + geom_line(aes(group = State)) + geom_point() +
         axis.title.y = element_text(size = 15), 
         legend.key.size = unit(1, &#39;cm&#39;), 
         legend.text = element_text(size = 13), 
-        title = element_text(size = 15))
-#d &lt;- ggplot(data = crabs, aes(x = spine))
-#d + geom_bar(aes(fill = as.factor(y)), position = &quot;dodge&quot;) + 
-#  labs(x = &quot;Female Crab Spine Condition&quot;, 
-#       title = &quot;Figure 2. Female Crab Spine Condition vs. Satellite Count&quot;) + 
-#  scale_fill_discrete(name = NULL) + 
-#  theme(axis.text.x = element_text(size = 10), 
-#        axis.text.y = element_text(size = 10), 
-#        axis.title.x = element_text(size = 15), 
-#        axis.title.y = element_text(size = 15), 
-#        legend.key.size = unit(1, &#39;cm&#39;), 
-#        legend.text = element_text(size = 13), 
-#        title = element_text(size = 12))
-
-
-#p &lt;- ggplot(data = crabs, aes(x = spine))
-#p + geom_bar(aes(fill = as.factor(color)), position = &quot;dodge&quot;) + 
-#  labs(x = &quot;Female Crab Spine Condition&quot;, 
-#       title = &quot;Figure. 3 Female Crab Spine Condition vs. Female Crab Color&quot;) + 
-#  scale_fill_discrete(name = &quot;Female Crab Color&quot;) + 
-#  theme(axis.text.x = element_text(size = 10), 
-#        axis.text.y = element_text(size = 10), 
-#        axis.title.x = element_text(size = 15), 
-#        axis.title.y = element_text(size = 15), 
-#        legend.key.size = unit(1, &#39;cm&#39;), 
-#        legend.title = element_text(size = 15), 
-#        legend.text = element_text(size = 13), 
-#        title = element_text(size = 12))</code></pre>
+        title = element_text(size = 15))</code></pre>
 </div>
 <div id="welcome-to-github-pages" class="section level2">
 <h2>Welcome to GitHub Pages</h2>
