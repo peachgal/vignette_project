@@ -31,18 +31,18 @@ library(jsonlite)
 library(tidyverse)
 library(countrycode)
 
-#first_input
+#general_input
 #country
 #status_input
-#record_date
-#date_input
-#time_input
+#date_from_input
+#date_to_input
+#time_from_input
+#time_to_input
 
-######## General input #################################################################
-
-general_input1 <- function(gen_input1, ...){
+######## General summary/countries/all################################################
+general_input <- function(gen_input, ...){
   
-  input1 <- tolower(gen_input1, ...) 
+  input1 <- tolower(gen_input, ...) 
   option <- c("all", "summary", "countries")
   num <- charmatch(input1, option, ...)
   
@@ -57,44 +57,7 @@ general_input1 <- function(gen_input1, ...){
   }
 }
 
-general_input2 <- function(gen_input2, ...){
-  
-  input1 <- tolower(gen_input2, ...) 
-  option <- c("dayone", "total/dayone")
-  num <- charmatch(input1, option, ...)
-  
-  if(!is.na(num)) {
-    
-    status_string <- option[num]
-    status_string
-    
-  } else {
-    
-    print("Sorry mate, your input is not valid! Please choose another one.")
-  }
-}
-
-general_input3 <- function(gen_input3, ...){
-  
-  input1 <- tolower(gen_input3, ...) 
-  option <- c("live", "date")
-  num <- charmatch(input1, option, ...)
-  
-  if(!is.na(num)) {
-    
-    status_string <- option[num]
-    status_string
-    
-  } else {
-    
-    print("Sorry mate, your input is not valid! Please choose another one.")
-  }
-}
-
-general_input("NULL")
-
 ####### country ###############################################################
-
 country <- function(country_name, ...){
   
   if(nchar(country_name) == 3) {
@@ -123,9 +86,7 @@ country <- function(country_name, ...){
 #nation <- "usa"
 #countrycode(nation, origin = "iso3c", destination = "country.name")
 
-
 ####### status ##################################################################
-
 status_input <- function(status, ...){
   
   input <- tolower(status, ...)
@@ -143,22 +104,7 @@ status_input <- function(status, ...){
   }
 }
 
-####### "date" enbale or not? ###################################################################
-record_date <- function(enable_date) {
-  
-  input <- tolower(enable_date)
-  
-  if(input == "true" | input == "yes" | input == "date") {
-    
-    input <- input
-    input
-    
-  }
-}
-
-record_date("DATE")
-####### date ######################################################################################
-
+####### date #########################################################################
 date_input_from <- function(date_from, ...){
   
   y <- c(date_from)
@@ -257,8 +203,7 @@ date_input_to <- function(date_to, ...){
   }
 }
 
-######### Time function #####################################################################################
-
+######### Time function #############################################################
 time_input_from <- function(time_from, ...){
   
   times <- c(time_from)
@@ -383,12 +328,10 @@ time_input_to <- function(time_to, ...){
   }
 }
 
-
 ############# A P I ##########################################################################
-
-ref_general <- function(gen_input1, ...){
+ref_general <- function(gen_input = "countries", ...){
   
-  info1 <- general_input1(gen_input1, ...)
+  info1 <- general_input(gen_input, ...)
   
   api_url <- if_else(info1 %in% c("all", "summary", "countries"), 
                      paste("https://api.covid19api.com", info1, sep = "/"), info1, ...)
@@ -396,32 +339,39 @@ ref_general <- function(gen_input1, ...){
   
 }
 
-#dayone all status & total/dayone all status
-ref_dayone_all_status <- function(gen_input2, country_name, ...){
+#dayone all status
+dayone_all_status <- function(country_name = "BB", ...){
   
-  info1 <- general_input2(gen_input2, ...)
   info2 <- country(country_name, ...)
   
-  api_url <- if_else(info1 %in% c("dayone", "total/dayone"), 
-                     paste("https://api.covid19api.com", info1, info2, sep = "/"), "missing", ...)
+  api_url <- paste("https://api.covid19api.com/dayone", info2, sep = "/", ...)
   api_url
   
 }
+
 #dayone with STATUS
-ref_dayone_status <- function(gen_input2, country_name, status, ...){
+dayone_status <- function(country_name = "BB", status = "con", ...){
   
-  info1 <- general_input2(gen_input2, ...)
   info2 <- country(country_name, ...)
   info3 <- status_input(status, ...)
   
-  api_url <- if_else(info1 %in% c("dayone", "total/dayone"), 
-                     paste("https://api.covid19api.com", info1, info2, info3, sep = "/"), "missing", ...)
+  api_url <- paste("https://api.covid19api.com/dayone", info2, info3, sep = "/", ...)
+  api_url
+  
+}
+
+dayone_status_live <- function(country_name = "BB", status = "con", ...){
+  
+  info2 <- country(country_name, ...)
+  info3 <- status_input(status, ...)
+  
+  api_url <- paste("https://api.covid19api.com/dayone", info2, info3, "live", sep = "/", ...)
   api_url
   
 }
 
 #by country ALL status from date time to date time 
-ref_datetime_specific_all_status <- function(country_name, date_from="2020-03-01", date_to="2020-03-07", 
+datetime_specific_all_status <- function(country_name="BB", date_from="2020-05-01", date_to="2020-05-03", 
                                              time_from="00:00:00", time_to="00:00:00", ...){
   
   info2 <- country(country_name, ...)
@@ -438,7 +388,7 @@ ref_datetime_specific_all_status <- function(country_name, date_from="2020-03-01
 }
 
 #by country with STATUS from date time to date time
-ref_datetime_specific_status <- function(country_name, status, date_from="2020-03-01", date_to="2020-03-07", 
+datetime_specific_status <- function(country_name="BB", status="con", date_from="2020-05-01", date_to="2020-05-03", 
                                          time_from="00:00:00", time_to="00:00:00", ...){
   
   info2 <- country(country_name, ...)
@@ -454,125 +404,73 @@ ref_datetime_specific_status <- function(country_name, status, date_from="2020-0
   api_url
   
 }
-ref_datetime_specific_status("usa", "03 3 2021", "05 06 2023")
 
-ref_dayone_status("day", status = "day", "usa")
-ref_dayone_all_status("con", "alabama")
+live_all_status <- function(country_name = "BB", ...){
+  
+    info2 <- country(country_name, ...)
+  
+  api_url <- paste("https://api.covid19api.com/live", info2, sep = "/", ...)
+  api_url
+  
+}
 
+live_status <- function(country_name = "BB", status = "con", ...){
+  
+  info2 <- country(country_name, ...)
+  info3 <- status_input(status, ...)
+  
+  api_url <- paste("https://api.covid19api.com/live", info2, info3, sep = "/", ...)
+  api_url
+  
+}
 
+live_status_after_date <- function(country_name = "BB", status = "con", 
+                                   date_from="2020-05-01", time_from="00:00:00", ...){
+  
+  info2 <- country(country_name, ...)
+  info3 <- status_input(status, ...)
+  
+  date1 <- date_input_from(date_from, ...)
+  time1 <- time_input_from(time_from, ...)
+  datetime <- paste0(date_from, "T", time_from, "Z", ...)
+  
+  api_url <- paste("https://api.covid19api.com/live", info2, info3, "date", datetime,  sep = "/", ...)
+  api_url
+  
+}
 
 choose_api <- function(type, ...) {
   
   switch(type,
          
          general = ref_general(...),
-         ref_dayone_all_status(...),
-         ref_dayone_status(...),
-         ref_datetime_specific_all_status(...),
-         ref_datetime_specific_status(...)
+         option1 = dayone_all_status(...),
+         option2 = dayone_status(...),
+         option3 = dayone_status_live(...),
+         option4 = datetime_specific_all_status(...),
+         option5 = datetime_specific_status(...),
+         option6 = live_all_status(...),
+         option7 = live_status(...),
+         option8 = live_status_after_date(...)
   )
 }
 
-choose_api(5, "usa", date_to="5 6 2021", time_to="5:4:23")
+choose_api(9)
 
-
-get_api_url <- function(input, country_name, status, enable_date = FALSE, date_from, date_to, 
-                        time_from = "00:00:00", time_to = "00:00:00", ...){
+get_data <- function(type, ...){
   
-  base <- "https://api.covid19api.com"
+  api_url <- choose_api(type, ...)
+  json_data <- GET(api_url)
+  extract_data <- rawToChar(json_data$content)
+  usable_form <- fromJSON(extract_data)
+  usable_form
   
-  info1 <- first_input(input1, ...)
-  
-  Summary, Countries, ALL data
-  #if(info1 %in% c("all", "summary", "countries")) {
-    
-   # api_url <- paste(base, info1, sep = "/")
-  #  api_url
-    
-  Day one case by case for a country
-  #} else if(info1 == c("dayone", "total/dayone")) {
-    
-   # if(!is.null(status)){
-      
-    #  info2 <- country(country_name)
-    #  info3 <- status_input(status)
-      
-    #  api_url <- paste(base, info1, info2, info3, sep = "/")
-    #  api_url
-      Day one all status for a country
-   # } else if(is.null(status)) {
-      
-    #  info2 <- country(country_name)
-    #  api_url <- paste(base, info1, info2, sep = "/")
-    #  api_url
-    }
-    # Live by country ALL STATUS
-  } else if(info1 == "live") {
-    
-    if(is.null(status)){
-      
-      info2 <- country(country_name)
-      api_url <- paste(base, info1, info2, sep = "/")
-      api_url
-      # Live by country and STATUS
-    } else if(!is.null(status) & is.null(date_from)) {
-      
-      info2 <- country(country_name)
-      info3 <- status_input(status)
-      api_url <- paste(base, info1, info2, info3, sep = "/")
-      api_url
-      # Live by country and status AFTER DATE
-    } else if(!is.null(status) & !is.null(date_from)) {
-      
-      info2 <- country(country_name)
-      info3 <- status_input(status)
-      
-      after_date <- record_date(date_yes)
-      
-      date1 <- date_input(date_from)
-      time1 <- time_input(time_from)
-      date_time_1 <- paste0(date1, "T", time1, "Z")
-      api_url <- paste(base, info1, info2, info3, after_date, date_time_1, sep = "/")
-      api_url
-      
-    }
-    By country all status from date time to date time
-  } else if(is.null(info1)) {
-    
-    if(is.null(status)) {
-      
-      info2 <- country(country_name)
-      
-      date1 <- date_input(date_from)
-      date2 <- date_input(date_to)
-      time1 <- time_input(time_from)
-      time2 <- time_input(time_to)
-      
-      latter <- paste0("?from=", date1, "T", time1, "Z&to=", date2, "T", time2, "Z")
-      api_url <- paste0(base, "/", info2, latter)
-      api_url
-      # By country and status from date time to date time
-    } else if(!is.null(status)) {
-      
-      info2 <- country(country_name)
-      info3 <- status_input(status)
-      
-      date1 <- date_input(date_from)
-      date2 <- date_input(date_to)
-      time1 <- time_input(time_from)
-      time2 <- time_input(time_to)
-      
-      latter <- paste0("?from=", date1, "T", time1, "Z&to=", date2, "T", time2, "Z")
-      api_url <- paste0(base, "/", info2, "/", info3, latter)
-      api_url
-    }
-    
-  }
-  #something1 <- GET()
-  #something2 <- rawToChar(something1$content)
-  #something3 <- fromJSON(something2)
-  #return(something3)
 }
+
+get_data(3)
+
+
+choose_api(5, "usa", date_to="5 6 2021", time_to="5:4:23")
 ```
 
 ## Getting an API
@@ -581,15 +479,18 @@ get_api_url <- function(input, country_name, status, enable_date = FALSE, date_f
 library(httr)
 library(jsonlite)
 library(tidyverse)
-dec_1 <- GET("https://api.covid19api.com/country/united-states?from=2020-12-31T00:00:00Z&to=2020-12-31T23:59:59Z")
+library(countrycode)
 
-dec_2 <- rawToChar(dec_1$content)
-
-dec_3 <- fromJSON(dec_2)
-
-head(dec_3)
-
-#dec_4 <- dec_3 %>% select(Province, Deaths, Active, Date) 
+dec_1 <- get_data(5, "usa", date_from="2020 12 31", date_to="2020 12 31", time_to="23:59:59")
+jan_1 <- get_data(5, "usa", date_from="2021 1 31", date_to="2021 1 31", time_to="23:59:59")
+feb_1 <- get_data(5, "usa", date_from="2021 2 28", date_to="2021 2 28", time_to="23:59:59")
+mar_1 <- get_data(5, "usa", date_from="2021 3 31", date_to="2021 3 31", time_to="23:59:59")
+apr_1 <- get_data(5, "usa", date_from="2021 4 30", date_to="2021 4 30", time_to="23:59:59")
+may_1 <- get_data(5, "usa", date_from="2021 5 31", date_to="2021 5 31", time_to="23:59:59")
+jun_1 <- get_data(5, "usa", date_from="2021 6 30", date_to="2021 6 30", time_to="23:59:59")
+jul_1 <- get_data(5, "usa", date_from="2021 7 31", date_to="2021 7 31", time_to="23:59:59")
+aug_1 <- get_data(5, "usa", date_from="2021 8 31", date_to="2021 8 31", time_to="23:59:59")
+sep_1 <- get_data(5, "usa", date_from="2021 9 30", date_to="2021 9 30", time_to="23:59:59")
 ```
 
 ``` r
