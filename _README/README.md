@@ -38,36 +38,473 @@ library(countrycode)
 #date_input
 #time_input
 
+######## General input #################################################################
 
-get_api_url <- function(input1 = NULL, country_name, status = NULL, date_yes, date_from = NULL, date_to = NULL, 
-                        time_from = "00:00:00", time_to = "00:00:00"){
+general_input1 <- function(gen_input1, ...){
+  
+  input1 <- tolower(gen_input1, ...) 
+  option <- c("all", "summary", "countries")
+  num <- charmatch(input1, option, ...)
+  
+  if(!is.na(num)) {
+    
+    status_string <- option[num]
+    status_string
+    
+  } else {
+    
+    print("Sorry mate, your input is not valid! Please choose another one.")
+  }
+}
+
+general_input2 <- function(gen_input2, ...){
+  
+  input1 <- tolower(gen_input2, ...) 
+  option <- c("dayone", "total/dayone")
+  num <- charmatch(input1, option, ...)
+  
+  if(!is.na(num)) {
+    
+    status_string <- option[num]
+    status_string
+    
+  } else {
+    
+    print("Sorry mate, your input is not valid! Please choose another one.")
+  }
+}
+
+general_input3 <- function(gen_input3, ...){
+  
+  input1 <- tolower(gen_input3, ...) 
+  option <- c("live", "date")
+  num <- charmatch(input1, option, ...)
+  
+  if(!is.na(num)) {
+    
+    status_string <- option[num]
+    status_string
+    
+  } else {
+    
+    print("Sorry mate, your input is not valid! Please choose another one.")
+  }
+}
+
+general_input("NULL")
+
+####### country ###############################################################
+
+country <- function(country_name, ...){
+  
+  if(nchar(country_name) == 3) {
+    
+    nation_name <- countrycode(as.character(country_name), origin = "iso3c", destination = "country.name", ...)
+    nation_name <- if_else(grepl(" ", nation_name, ignore.case = TRUE), tolower(sub(" ", "-", nation_name)), tolower(nation_name), ...)
+    nation_name <- paste("country", nation_name, sep = "/", ...)
+    nation_name
+    
+  } else if(nchar(country_name) == 2) {
+    
+    nation_name <- countrycode(as.character(country_name), origin = "iso2c", destination = "country.name", ...)
+    nation_name <- if_else(grepl(" ", nation_name, ignore.case = TRUE), tolower(sub(" ", "-", nation_name)), tolower(nation_name), ...)
+    nation_name <- paste("country", nation_name, sep = "/", ...)
+    nation_name
+    
+  } else {
+    
+    nation_name <- if_else(grepl(" ", country_name, ignore.case = TRUE), tolower(sub(" ", "-", country_name)), tolower(country_name), ...)
+    nation_name <- paste("country", nation_name, sep = "/", ...)
+    nation_name
+  }
+}
+
+#countrycode('Albania', origin = 'country.name', destination = 'iso3c')
+#nation <- "usa"
+#countrycode(nation, origin = "iso3c", destination = "country.name")
+
+
+####### status ##################################################################
+
+status_input <- function(status, ...){
+  
+  input <- tolower(status, ...)
+  option <- c("confirmed", "recovered", "deaths")
+  num <- charmatch(input, option, ...)
+  
+  if(!is.na(num)) {
+    
+    status_string <- paste("status", option[num], sep="/", ...)
+    status_string
+    
+  } else {
+    
+    print("Sorry mate, your input is not valid! Please choose another one.")
+  }
+}
+
+####### "date" enbale or not? ###################################################################
+record_date <- function(enable_date) {
+  
+  input <- tolower(enable_date)
+  
+  if(input == "true" | input == "yes" | input == "date") {
+    
+    input <- input
+    input
+    
+  }
+}
+
+record_date("DATE")
+####### date ######################################################################################
+
+date_input_from <- function(date_from, ...){
+  
+  y <- c(date_from)
+  y <- as_tibble(y)
+  
+  if(grepl("/", y$value, ignore.case = TRUE, ...)){
+    
+    temp <- y %>% separate(value, c("first", "second", "third"), sep="/", ...)
+    
+  } else if(grepl("-", y$value, ignore.case = TRUE, ...)) {
+    
+    temp <- y %>% separate(value, c("first", "second", "third"), sep="-", ...)
+    
+  } else {
+    
+    temp <- y %>% separate(value, c("first", "second", "third"), sep=" ", ...)
+  }
+  if(nchar(temp$first) == 4){
+    
+    if(nchar(temp$second) == 1){
+      
+      temp$second <- paste0("0", temp$second, ...)
+      
+      if(nchar(temp$third) == 1){
+        
+        temp$third <- paste0("0", temp$third, ...)
+      }
+    }
+    temp <- unite(temp, date, first, second, third, sep="-", remove = TRUE, ...)
+    temp$date
+    
+  } else {
+    
+    if(nchar(temp$second) == 1){
+      
+      temp$second <- paste0("0", temp$second, ...)
+      
+      if(nchar(temp$third) == 1){
+        
+        temp$third <- paste0("0", temp$third, ...)
+      }
+    }
+    
+    temp <- unite(temp, date, first, second, third, sep="-", remove = TRUE, ...)
+    temp$date <- mdy(temp$date, ...)
+    temp$date  
+  }
+}
+
+date_input_to <- function(date_to, ...){
+  
+  y <- c(date_to)
+  y <- as_tibble(y)
+  
+  if(grepl("/", y$value, ignore.case = TRUE, ...)){
+    
+    temp <- y %>% separate(value, c("first", "second", "third"), sep="/", ...)
+    
+  } else if(grepl("-", y$value, ignore.case = TRUE, ...)) {
+    
+    temp <- y %>% separate(value, c("first", "second", "third"), sep="-", ...)
+    
+  } else {
+    
+    temp <- y %>% separate(value, c("first", "second", "third"), sep=" ", ...)
+  }
+  if(nchar(temp$first) == 4){
+    
+    if(nchar(temp$second) == 1){
+      
+      temp$second <- paste0("0", temp$second, ...)
+      
+      if(nchar(temp$third) == 1){
+        
+        temp$third <- paste0("0", temp$third, ...)
+      }
+    }
+    temp <- unite(temp, date, first, second, third, sep="-", remove = TRUE, ...)
+    temp$date
+    
+  } else {
+    
+    if(nchar(temp$second) == 1){
+      
+      temp$second <- paste0("0", temp$second, ...)
+      
+      if(nchar(temp$third) == 1){
+        
+        temp$third <- paste0("0", temp$third, ...)
+      }
+    }
+    
+    temp <- unite(temp, date, first, second, third, sep="-", remove = TRUE, ...)
+    temp$date <- mdy(temp$date, ...)
+    temp$date  
+  }
+}
+
+######### Time function #####################################################################################
+
+time_input_from <- function(time_from, ...){
+  
+  times <- c(time_from)
+  times <- as_tibble(times)
+  
+  if(grepl(":", times$value, ignore.case = TRUE, ...)) {
+    
+    times <- times %>% separate(value, c("first", "second", "third"), sep=":", ...)
+    
+  } else if(grepl("-", times$value, ignore.case = TRUE, ...)) {
+    
+    times <- times %>% separate(value, c("first", "second", "third"), sep="-", ...)
+    
+  } else if(grepl("/", times$value, ignore.case = TRUE, ...)) {
+    
+    times <- times %>% separate(value, c("first", "second", "third"), sep="/", ...)
+    
+  }
+  
+  if(nchar(times$first) == 1){
+    
+    times$first <- paste0("0", times$first, ...)
+    
+    if(nchar(times$second) == 1){
+      
+      times$second <- paste0("0", times$second, ...)
+      
+      if(nchar(times$third) == 1){
+        
+        times$third <- paste0("0", times$third, ...)
+        
+      }
+    }
+  }
+  
+  if(as.numeric(times$first) %in% c(0:23)){
+    
+    if(as.numeric(times$second) %in% c(0:59)){
+      
+      if(as.numeric(times$third) %in% c(0:59)){
+        
+        
+        times <- unite(times, value, first, second, third, sep=":", remove = TRUE, ...)
+        times$value
+        
+      } else {
+        
+        print("Sorry mate, your input is not valid! Please choose a time between 0 and 59 seconds.")
+        
+      }
+    } else {
+      
+      print("Sorry mate, your input is not valid! Please choose a time between 0 and 59 minutes.")
+      
+    }
+  } else {
+    
+    print("Sorry mate, your input is not valid! Please choose a military time between 0 and 23 hours.")
+    
+  }
+}
+
+time_input_to <- function(time_to, ...){
+  
+  times <- c(time_to)
+  times <- as_tibble(times)
+  
+  if(grepl(":", times$value, ignore.case = TRUE, ...)) {
+    
+    times <- times %>% separate(value, c("first", "second", "third"), sep=":", ...)
+    
+  } else if(grepl("-", times$value, ignore.case = TRUE, ...)) {
+    
+    times <- times %>% separate(value, c("first", "second", "third"), sep="-", ...)
+    
+  } else if(grepl("/", times$value, ignore.case = TRUE, ...)) {
+    
+    times <- times %>% separate(value, c("first", "second", "third"), sep="/", ...)
+    
+  }
+  
+  if(nchar(times$first) == 1){
+    
+    times$first <- paste0("0", times$first, ...)
+    
+    if(nchar(times$second) == 1){
+      
+      times$second <- paste0("0", times$second, ...)
+      
+      if(nchar(times$third) == 1){
+        
+        times$third <- paste0("0", times$third, ...)
+        
+      }
+    }
+  }
+  
+  if(as.numeric(times$first) %in% c(0:23)){
+    
+    if(as.numeric(times$second) %in% c(0:59)){
+      
+      if(as.numeric(times$third) %in% c(0:59)){
+        
+        
+        times <- unite(times, value, first, second, third, sep=":", remove = TRUE, ...)
+        times$value
+        
+      } else {
+        
+        print("Sorry mate, your input is not valid! Please choose a time between 0 and 59 seconds.")
+        
+      }
+    } else {
+      
+      print("Sorry mate, your input is not valid! Please choose a time between 0 and 59 minutes.")
+      
+    }
+  } else {
+    
+    print("Sorry mate, your input is not valid! Please choose a military time between 0 and 23 hours.")
+    
+  }
+}
+
+
+############# A P I ##########################################################################
+
+ref_general <- function(gen_input1, ...){
+  
+  info1 <- general_input1(gen_input1, ...)
+  
+  api_url <- if_else(info1 %in% c("all", "summary", "countries"), 
+                     paste("https://api.covid19api.com", info1, sep = "/"), info1, ...)
+  api_url
+  
+}
+
+#dayone all status & total/dayone all status
+ref_dayone_all_status <- function(gen_input2, country_name, ...){
+  
+  info1 <- general_input2(gen_input2, ...)
+  info2 <- country(country_name, ...)
+  
+  api_url <- if_else(info1 %in% c("dayone", "total/dayone"), 
+                     paste("https://api.covid19api.com", info1, info2, sep = "/"), "missing", ...)
+  api_url
+  
+}
+#dayone with STATUS
+ref_dayone_status <- function(gen_input2, country_name, status, ...){
+  
+  info1 <- general_input2(gen_input2, ...)
+  info2 <- country(country_name, ...)
+  info3 <- status_input(status, ...)
+  
+  api_url <- if_else(info1 %in% c("dayone", "total/dayone"), 
+                     paste("https://api.covid19api.com", info1, info2, info3, sep = "/"), "missing", ...)
+  api_url
+  
+}
+
+#by country ALL status from date time to date time 
+ref_datetime_specific_all_status <- function(country_name, date_from="2020-03-01", date_to="2020-03-07", 
+                                             time_from="00:00:00", time_to="00:00:00", ...){
+  
+  info2 <- country(country_name, ...)
+  
+  date1 <- date_input_from(date_from, ...)
+  date2 <- date_input_to(date_to, ...)
+  time1 <- time_input_from(time_from, ...)
+  time2 <- time_input_to(time_to, ...)
+  
+  latter <- paste0("?from=", date1, "T", time1, "Z&to=", date2, "T", time2, "Z", ...)
+  api_url <- paste0("https://api.covid19api.com/", info2, latter, ...)
+  api_url
+  
+}
+
+#by country with STATUS from date time to date time
+ref_datetime_specific_status <- function(country_name, status, date_from="2020-03-01", date_to="2020-03-07", 
+                                         time_from="00:00:00", time_to="00:00:00", ...){
+  
+  info2 <- country(country_name, ...)
+  info3 <- status_input(status, ...)
+  
+  date1 <- date_input_from(date_from, ...)
+  date2 <- date_input_to(date_to, ...)
+  time1 <- time_input_from(time_from, ...)
+  time2 <- time_input_to(time_to, ...)
+  
+  latter <- paste0("?from=", date1, "T", time1, "Z&to=", date2, "T", time2, "Z", ...)
+  api_url <- paste0("https://api.covid19api.com/", info2, "/", info3, latter, ...)
+  api_url
+  
+}
+ref_datetime_specific_status("usa", "03 3 2021", "05 06 2023")
+
+ref_dayone_status("day", status = "day", "usa")
+ref_dayone_all_status("con", "alabama")
+
+
+
+choose_api <- function(type, ...) {
+  
+  switch(type,
+         
+         general = ref_general(...),
+         ref_dayone_all_status(...),
+         ref_dayone_status(...),
+         ref_datetime_specific_all_status(...),
+         ref_datetime_specific_status(...)
+  )
+}
+
+choose_api(5, "usa", date_to="5 6 2021", time_to="5:4:23")
+
+
+get_api_url <- function(input, country_name, status, enable_date = FALSE, date_from, date_to, 
+                        time_from = "00:00:00", time_to = "00:00:00", ...){
   
   base <- "https://api.covid19api.com"
   
   info1 <- first_input(input1, ...)
   
-  # Summary, Countries, ALL data
-  if(info1 %in% c("all", "summary", "countries")) {
+  Summary, Countries, ALL data
+  #if(info1 %in% c("all", "summary", "countries")) {
     
-    api_url <- paste(base, info1, sep = "/")
-    api_url
+   # api_url <- paste(base, info1, sep = "/")
+  #  api_url
     
-    #Day one case by case for a country
-  } else if(info1 == c("dayone", "total/dayone")) {
+  Day one case by case for a country
+  #} else if(info1 == c("dayone", "total/dayone")) {
     
-    if(!is.null(status)){
+   # if(!is.null(status)){
       
-    info2 <- country(country_name)
-    info3 <- status_input(status)
-    
-    api_url <- paste(base, info1, info2, info3, sep = "/")
-    api_url
-    #Day one all status for a country
-    } else if(is.null(status)) {
+    #  info2 <- country(country_name)
+    #  info3 <- status_input(status)
       
-      info2 <- country(country_name)
-      api_url <- paste(base, info1, info2, sep = "/")
-      api_url
+    #  api_url <- paste(base, info1, info2, info3, sep = "/")
+    #  api_url
+      Day one all status for a country
+   # } else if(is.null(status)) {
+      
+    #  info2 <- country(country_name)
+    #  api_url <- paste(base, info1, info2, sep = "/")
+    #  api_url
     }
     # Live by country ALL STATUS
   } else if(info1 == "live") {
@@ -99,7 +536,7 @@ get_api_url <- function(input1 = NULL, country_name, status = NULL, date_yes, da
       api_url
       
     }
-    # By country all status from date time to date time
+    By country all status from date time to date time
   } else if(is.null(info1)) {
     
     if(is.null(status)) {
@@ -136,208 +573,6 @@ get_api_url <- function(input1 = NULL, country_name, status = NULL, date_yes, da
   #something3 <- fromJSON(something2)
   #return(something3)
 }
-
-########## First option ########################################################
-first_input <- function(input1, ...){
-  
-  input <- tolower(input1, ...) 
-  option <- c("all", "summary", "countries", "dayone", "total/dayone", "live")
-  num <- charmatch(input, option, ...)
-  
-  if(is.na(num)) {
-    
-    status_string <- input
-    status_string
-    
-  } else {
-    
-    status_string <- option[num]
-    status_string
-  }
-}
-
-######## Status function #########################################################
-status_input <- function(input1){
-  
-  input <- tolower(input1)
-  option <- c("confirmed", "recovered", "deaths")
-  num <- charmatch(input, option)
-  
-  if(is.na(num)) {
-    
-    print("Sorry mate, your input is not valid here! Please choose another one.")
-    
-    
-  } else {
-    
-    status_string <- paste("status", option[num], sep="/")
-    status_string
-  }
-}
-
-status("COM")
-
-####### Country function ##################################################
-country <- function(nation, ...){
-  
-  if(nchar(nation) == 3) {
-    
-    nation_name <- countrycode(as.character(nation), origin = "iso3c", destination = "country.name")
-    nation_name <- if_else(grepl(" ", nation_name, ignore.case = TRUE), tolower(sub(" ", "-", nation_name)), tolower(nation_name))
-    nation_name <- paste("country", nation_name, sep = "/")
-    nation_name
-    
-  } else if(nchar(nation) == 2) {
-    
-    nation_name <- countrycode(as.character(nation), origin = "iso2c", destination = "country.name")
-    nation_name <- if_else(grepl(" ", nation_name, ignore.case = TRUE), tolower(sub(" ", "-", nation_name)), tolower(nation_name))
-    nation_name <- paste("country", nation_name, sep = "/")
-    nation_name
-    
-  } else {
-    
-    nation_name <- if_else(grepl(" ", nation, ignore.case = TRUE), tolower(sub(" ", "-", nation)), tolower(nation))
-    nation_name <- paste("country", nation_name, sep = "/")
-    nation_name
-  }
-}
-
-country("kor")
-country("south africa")
-country("UNIted STates")
-
-###### "date" enable or not? #######################################################################
-record_date <- function(input1 = "FALSE") {
-  
-  input <- tolower(input1)
-  
-  if(input == "true" | input == "yes") {
-    
-    input <- "date"
-    input
-    
-  }
-}
-
-record_date("TRUE")
-record_date("Yes")
-
-
-##### Date function ########################################################
-date_input <- function(input1){
-  
-  y <- c(input1)
-  y <- as_tibble(y)
-  
-  if(grepl("/", y$value, ignore.case = TRUE)){
-    
-    temp <- y %>% separate(value, c("first", "second", "third"), sep="/")
-    
-  } else if(grepl("-", y$value, ignore.case = TRUE)) {
-    
-    temp <- y %>% separate(value, c("first", "second", "third"), sep="-")
-    
-  } else {
-    
-    temp <- y %>% separate(value, c("first", "second", "third"), sep=" ")
-  }
-  if(nchar(temp$first) == 4){
-    
-    if(nchar(temp$second) == 1){
-      
-      temp$second <- paste0("0", temp$second)
-      
-      if(nchar(temp$third) == 1){
-        
-        temp$third <- paste0("0", temp$third)
-      }
-    }
-    temp <- unite(temp, date, first, second, third, sep="-", remove = TRUE)
-    temp$date
-    
-  } else {
-    
-    if(nchar(temp$second) == 1){
-      
-      temp$second <- paste0("0", temp$second)
-      
-      if(nchar(temp$third) == 1){
-        
-        temp$third <- paste0("0", temp$third)
-      }
-    }
-    
-    temp <- unite(temp, date, first, second, third, sep="-", remove = TRUE)
-    temp$date <- mdy(temp$date)
-    temp$date  
-  }
-}
-
-########### Time function ##########################################################
-time_input <- function(input1){
-  
-  times <- input1
-  times <- as_tibble(times)
-  
-  if(grepl(":", times$value, ignore.case = TRUE)) {
-    
-    times <- times %>% separate(value, c("first", "second", "third"), sep=":")
-    
-  } else if(grepl("-", times$value, ignore.case = TRUE)) {
-    
-    times <- times %>% separate(value, c("first", "second", "third"), sep="-")
-    
-  } else if(grepl("/", times$value, ignore.case = TRUE)) {
-    
-    times <- times %>% separate(value, c("first", "second", "third"), sep="/")
-    
-  }
-  
-  if(nchar(times$first) == 1){
-    
-    times$first <- paste0("0", times$first)
-    
-    if(nchar(times$second) == 1){
-      
-      times$second <- paste0("0", times$second)
-      
-      if(nchar(times$third) == 1){
-        
-        times$third <- paste0("0", times$third)
-        
-      }
-    }
-  }
-  
-  if(as.numeric(times$first) %in% c(0:23)){
-    
-    if(as.numeric(times$second) %in% c(0:59)){
-      
-      if(as.numeric(times$third) %in% c(0:59)){
-        
-        
-        times <- unite(times, value, first, second, third, sep=":", remove = TRUE)
-        times$value
-        
-      } else {
-        
-        print("Sorry mate, your input is not valid! Please choose a time between 0 and 59 seconds.")
-        
-      }
-    } else {
-      
-      print("Sorry mate, your input is not valid! Please choose a time between 0 and 59 minutes.")
-      
-    }
-  } else {
-    
-    print("Sorry mate, your input is not valid! Please choose a military time between 0 and 23 hours.")
-    
-  }
-}
-
-time_input("23-34-56")
-time_input("5/3/23")
 ```
 
 ## Getting an API
