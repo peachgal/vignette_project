@@ -200,179 +200,209 @@ library(jsonlite)
 library(tidyverse)
 library(countrycode)
 
+#general_input
+#country
+#status_input
+#date_from_input
+#date_to_input
+#time_from_input
+#time_to_input
 
-
-
-
-
-get_api &lt;- function(name, country, status, vintage_from, vintage_to, time_from = &quot;00:00:00&quot;, time_to = &quot;00:00:00&quot;){
+######## General summary/countries/all################################################
+general_input &lt;- function(gen_input, ...){
   
-  base_url &lt;- &quot;https://api.covid19api.com&quot;
+  input1 &lt;- tolower(gen_input, ...) 
+  option &lt;- c(&quot;all&quot;, &quot;summary&quot;, &quot;countries&quot;)
+  num &lt;- charmatch(input1, option, ...)
   
-  if(!is.null(name)) {
-    
-    api_url &lt;- paste(base_url, tolower(name), sep = &quot;/&quot;)
-  }
-  else if(!is.null(country)) {
-    
-    country_name &lt;- if_else(grepl(&quot; &quot;, country, ignore.case = TRUE), tolower(sub(&quot; &quot;, &quot;-&quot;, country)), tolower(country))
-    
-    api_url &lt;- paste(base_url, &quot;country&quot;, country_name, sep = &quot;/&quot;)
-    
-    if(!is.null(status)) {
-      
-      status_name &lt;- tolower(status)
-      
-      if(!is.nul(vintage_from) &amp; !is.null(vintage_to)) {
-        
-        x &lt;- parse_date_time(&quot;05/25/2017&quot;, orders = &quot;mdy&quot;)
-        x &lt;- as.Date(x)
-        print(x)
-        
-        
-        
-        date_n_time &lt;- paste0(&quot;?&quot;, &quot;from=&quot;, vintage_from, &quot;T&quot;, time_from, &quot;Z&amp;to=&quot;, vintage_to, &quot;T&quot;, time_to, &quot;Z&quot;)
-        
-        
-      }
-      api_url &lt;- paste0(base_url, &quot;status&quot;, &quot;/&quot;, status_name, &quot;?&quot;)
-      
-      
-    }
-  }
-  
-  #status = comfirmed, recovered deaths
-  
-  
-  api_url
-  
-  #something1 &lt;- GET()
-  #something2 &lt;- rawToChar(something1$content)
-  #something3 &lt;- fromJSON(something2)
-  #return(something3)
-}
-
-########## First option ########################################################
-first_op &lt;- function(input1, ...){
-  
-  input &lt;- tolower(input1, ...) 
-  option &lt;- c(&quot;summary&quot;, &quot;countries&quot;)
-  num &lt;- charmatch(input, option, ...)
-  
-  if(is.na(num)) {
-    
-    print(&quot;Sorry mate, your input is not valid here! Please choose another one.&quot;)
-    
-  } else {
+  if(!is.na(num)) {
     
     status_string &lt;- option[num]
     status_string
+    
+  } else {
+    
+    print(&quot;Sorry mate, your input is not valid! Please choose another one.&quot;)
   }
 }
 
-first_op(&quot;su&quot;)
-first_op(&quot;co&quot;)
-
-######## Status function #########################################################
-status &lt;- function(input1){
+####### country ###############################################################
+country &lt;- function(country_name, ...){
   
-  input &lt;- tolower(input1)
+  if(nchar(country_name) == 3) {
+    
+    nation_name &lt;- countrycode(as.character(country_name), origin = &quot;iso3c&quot;, destination = &quot;country.name&quot;, ...)
+    nation_name &lt;- if_else(grepl(&quot; &quot;, nation_name, ignore.case = TRUE), tolower(sub(&quot; &quot;, &quot;-&quot;, nation_name)), tolower(nation_name), ...)
+    nation_name &lt;- paste(&quot;country&quot;, nation_name, sep = &quot;/&quot;, ...)
+    nation_name
+    
+  } else if(nchar(country_name) == 2) {
+    
+    nation_name &lt;- countrycode(as.character(country_name), origin = &quot;iso2c&quot;, destination = &quot;country.name&quot;, ...)
+    nation_name &lt;- if_else(grepl(&quot; &quot;, nation_name, ignore.case = TRUE), tolower(sub(&quot; &quot;, &quot;-&quot;, nation_name)), tolower(nation_name), ...)
+    nation_name &lt;- paste(&quot;country&quot;, nation_name, sep = &quot;/&quot;, ...)
+    nation_name
+    
+  } else {
+    
+    nation_name &lt;- if_else(grepl(&quot; &quot;, country_name, ignore.case = TRUE), tolower(sub(&quot; &quot;, &quot;-&quot;, country_name)), tolower(country_name), ...)
+    nation_name &lt;- paste(&quot;country&quot;, nation_name, sep = &quot;/&quot;, ...)
+    nation_name
+  }
+}
+
+#countrycode(&#39;Albania&#39;, origin = &#39;country.name&#39;, destination = &#39;iso3c&#39;)
+#nation &lt;- &quot;usa&quot;
+#countrycode(nation, origin = &quot;iso3c&quot;, destination = &quot;country.name&quot;)
+
+####### status ##################################################################
+status_input &lt;- function(status, ...){
+  
+  input &lt;- tolower(status, ...)
   option &lt;- c(&quot;confirmed&quot;, &quot;recovered&quot;, &quot;deaths&quot;)
-  num &lt;- charmatch(input, option)
+  num &lt;- charmatch(input, option, ...)
   
-  if(is.na(num)) {
+  if(!is.na(num)) {
     
-    print(&quot;Sorry mate, your input is not valid here! Please choose another one.&quot;)
-    
-    
-  } else {
-    
-    status_string &lt;- paste(&quot;status&quot;, option[num], sep=&quot;/&quot;)
+    status_string &lt;- paste(&quot;status&quot;, option[num], sep=&quot;/&quot;, ...)
     status_string
-  }
-}
-
-status(&quot;COM&quot;)
-
-####### Country function ##################################################
-country &lt;- function(nation, ...){
-  
-  if(nchar(nation) == 3) {
     
-    nation_name &lt;- countrycode(as.character(nation), origin = &quot;iso3c&quot;, destination = &quot;country.name&quot;)
-    nation_name &lt;- if_else(grepl(&quot; &quot;, nation_name, ignore.case = TRUE), tolower(sub(&quot; &quot;, &quot;-&quot;, nation_name)), tolower(nation_name))
-    nation_name
-    
-  } else if(nchar(nation) == 2) {
-    
-    nation_name &lt;- countrycode(as.character(nation), origin = &quot;iso2c&quot;, destination = &quot;country.name&quot;)
-    nation_name &lt;- if_else(grepl(&quot; &quot;, nation_name, ignore.case = TRUE), tolower(sub(&quot; &quot;, &quot;-&quot;, nation_name)), tolower(nation_name))
-    nation_name
   } else {
     
-    nation_name &lt;- if_else(grepl(&quot; &quot;, nation, ignore.case = TRUE), tolower(sub(&quot; &quot;, &quot;-&quot;, nation)), tolower(nation))
-    nation_name
+    print(&quot;Sorry mate, your input is not valid! Please choose another one.&quot;)
   }
 }
-##### Date function ########################################################
-date_1 &lt;- function(date){
+
+####### date #########################################################################
+date_input_from &lt;- function(date_from, ...){
   
-  y &lt;- c(date) #, &quot;04-16-2016&quot;)
+  y &lt;- c(date_from)
   y &lt;- as_tibble(y)
   
-  if(grepl(&quot;/&quot;, y$value, ignore.case = TRUE)){
+  if(grepl(&quot;/&quot;, y$value, ignore.case = TRUE, ...)){
     
-    temp &lt;- y %&gt;% separate(value, c(&quot;first&quot;, &quot;second&quot;, &quot;third&quot;), sep=&quot;/&quot;)
+    temp &lt;- y %&gt;% separate(value, c(&quot;first&quot;, &quot;second&quot;, &quot;third&quot;), sep=&quot;/&quot;, ...)
+    
+  } else if(grepl(&quot;-&quot;, y$value, ignore.case = TRUE, ...)) {
+    
+    temp &lt;- y %&gt;% separate(value, c(&quot;first&quot;, &quot;second&quot;, &quot;third&quot;), sep=&quot;-&quot;, ...)
     
   } else {
     
-    temp &lt;- y %&gt;% separate(value, c(&quot;first&quot;, &quot;second&quot;, &quot;third&quot;), sep=&quot;-&quot;)
-    
+    temp &lt;- y %&gt;% separate(value, c(&quot;first&quot;, &quot;second&quot;, &quot;third&quot;), sep=&quot; &quot;, ...)
   }
   if(nchar(temp$first) == 4){
     
-    temp &lt;- unite(temp, date, first, second, third, sep=&quot;-&quot;, remove = TRUE)
+    if(nchar(temp$second) == 1){
+      
+      temp$second &lt;- paste0(&quot;0&quot;, temp$second, ...)
+      
+      if(nchar(temp$third) == 1){
+        
+        temp$third &lt;- paste0(&quot;0&quot;, temp$third, ...)
+      }
+    }
+    temp &lt;- unite(temp, date, first, second, third, sep=&quot;-&quot;, remove = TRUE, ...)
     temp$date
     
   } else {
     
-    temp &lt;- unite(temp, date, first, second, third, sep=&quot;-&quot;, remove = TRUE)
-    temp$date &lt;- mdy(temp$date)
+    if(nchar(temp$second) == 1){
+      
+      temp$second &lt;- paste0(&quot;0&quot;, temp$second, ...)
+      
+      if(nchar(temp$third) == 1){
+        
+        temp$third &lt;- paste0(&quot;0&quot;, temp$third, ...)
+      }
+    }
+    
+    temp &lt;- unite(temp, date, first, second, third, sep=&quot;-&quot;, remove = TRUE, ...)
+    temp$date &lt;- mdy(temp$date, ...)
     temp$date  
   }
 }
 
-########### Time function ##########################################################
-time_input &lt;- function(input1){
+date_input_to &lt;- function(date_to, ...){
   
-  times &lt;- input1
+  y &lt;- c(date_to)
+  y &lt;- as_tibble(y)
+  
+  if(grepl(&quot;/&quot;, y$value, ignore.case = TRUE, ...)){
+    
+    temp &lt;- y %&gt;% separate(value, c(&quot;first&quot;, &quot;second&quot;, &quot;third&quot;), sep=&quot;/&quot;, ...)
+    
+  } else if(grepl(&quot;-&quot;, y$value, ignore.case = TRUE, ...)) {
+    
+    temp &lt;- y %&gt;% separate(value, c(&quot;first&quot;, &quot;second&quot;, &quot;third&quot;), sep=&quot;-&quot;, ...)
+    
+  } else {
+    
+    temp &lt;- y %&gt;% separate(value, c(&quot;first&quot;, &quot;second&quot;, &quot;third&quot;), sep=&quot; &quot;, ...)
+  }
+  if(nchar(temp$first) == 4){
+    
+    if(nchar(temp$second) == 1){
+      
+      temp$second &lt;- paste0(&quot;0&quot;, temp$second, ...)
+      
+      if(nchar(temp$third) == 1){
+        
+        temp$third &lt;- paste0(&quot;0&quot;, temp$third, ...)
+      }
+    }
+    temp &lt;- unite(temp, date, first, second, third, sep=&quot;-&quot;, remove = TRUE, ...)
+    temp$date
+    
+  } else {
+    
+    if(nchar(temp$second) == 1){
+      
+      temp$second &lt;- paste0(&quot;0&quot;, temp$second, ...)
+      
+      if(nchar(temp$third) == 1){
+        
+        temp$third &lt;- paste0(&quot;0&quot;, temp$third, ...)
+      }
+    }
+    
+    temp &lt;- unite(temp, date, first, second, third, sep=&quot;-&quot;, remove = TRUE, ...)
+    temp$date &lt;- mdy(temp$date, ...)
+    temp$date  
+  }
+}
+
+######### Time function #############################################################
+time_input_from &lt;- function(time_from, ...){
+  
+  times &lt;- c(time_from)
   times &lt;- as_tibble(times)
   
-  if(grepl(&quot;:&quot;, times$value, ignore.case = TRUE)) {
+  if(grepl(&quot;:&quot;, times$value, ignore.case = TRUE, ...)) {
     
-    times &lt;- times %&gt;% separate(value, c(&quot;first&quot;, &quot;second&quot;, &quot;third&quot;), sep=&quot;:&quot;)
+    times &lt;- times %&gt;% separate(value, c(&quot;first&quot;, &quot;second&quot;, &quot;third&quot;), sep=&quot;:&quot;, ...)
     
-  } else if(grepl(&quot;-&quot;, times$value, ignore.case = TRUE)) {
+  } else if(grepl(&quot;-&quot;, times$value, ignore.case = TRUE, ...)) {
     
-    times &lt;- times %&gt;% separate(value, c(&quot;first&quot;, &quot;second&quot;, &quot;third&quot;), sep=&quot;-&quot;)
+    times &lt;- times %&gt;% separate(value, c(&quot;first&quot;, &quot;second&quot;, &quot;third&quot;), sep=&quot;-&quot;, ...)
     
-  } else if(grepl(&quot;/&quot;, times$value, ignore.case = TRUE)) {
+  } else if(grepl(&quot;/&quot;, times$value, ignore.case = TRUE, ...)) {
     
-    times &lt;- times %&gt;% separate(value, c(&quot;first&quot;, &quot;second&quot;, &quot;third&quot;), sep=&quot;/&quot;)
+    times &lt;- times %&gt;% separate(value, c(&quot;first&quot;, &quot;second&quot;, &quot;third&quot;), sep=&quot;/&quot;, ...)
     
   }
   
   if(nchar(times$first) == 1){
     
-    times$first &lt;- paste0(&quot;0&quot;, times$first)
+    times$first &lt;- paste0(&quot;0&quot;, times$first, ...)
     
     if(nchar(times$second) == 1){
       
-      times$second &lt;- paste0(&quot;0&quot;, times$second)
+      times$second &lt;- paste0(&quot;0&quot;, times$second, ...)
       
       if(nchar(times$third) == 1){
         
-        times$third &lt;- paste0(&quot;0&quot;, times$third)
+        times$third &lt;- paste0(&quot;0&quot;, times$third, ...)
         
       }
     }
@@ -385,7 +415,7 @@ time_input &lt;- function(input1){
       if(as.numeric(times$third) %in% c(0:59)){
         
         
-        times &lt;- unite(times, value, first, second, third, sep=&quot;:&quot;, remove = TRUE)
+        times &lt;- unite(times, value, first, second, third, sep=&quot;:&quot;, remove = TRUE, ...)
         times$value
         
       } else {
@@ -405,41 +435,342 @@ time_input &lt;- function(input1){
   }
 }
 
-time_input(&quot;23-34-56&quot;)
-time_input(&quot;5/3/23&quot;)</code></pre>
+time_input_to &lt;- function(time_to, ...){
+  
+  times &lt;- c(time_to)
+  times &lt;- as_tibble(times)
+  
+  if(grepl(&quot;:&quot;, times$value, ignore.case = TRUE, ...)) {
+    
+    times &lt;- times %&gt;% separate(value, c(&quot;first&quot;, &quot;second&quot;, &quot;third&quot;), sep=&quot;:&quot;, ...)
+    
+  } else if(grepl(&quot;-&quot;, times$value, ignore.case = TRUE, ...)) {
+    
+    times &lt;- times %&gt;% separate(value, c(&quot;first&quot;, &quot;second&quot;, &quot;third&quot;), sep=&quot;-&quot;, ...)
+    
+  } else if(grepl(&quot;/&quot;, times$value, ignore.case = TRUE, ...)) {
+    
+    times &lt;- times %&gt;% separate(value, c(&quot;first&quot;, &quot;second&quot;, &quot;third&quot;), sep=&quot;/&quot;, ...)
+    
+  }
+  
+  if(nchar(times$first) == 1){
+    
+    times$first &lt;- paste0(&quot;0&quot;, times$first, ...)
+    
+    if(nchar(times$second) == 1){
+      
+      times$second &lt;- paste0(&quot;0&quot;, times$second, ...)
+      
+      if(nchar(times$third) == 1){
+        
+        times$third &lt;- paste0(&quot;0&quot;, times$third, ...)
+        
+      }
+    }
+  }
+  
+  if(as.numeric(times$first) %in% c(0:23)){
+    
+    if(as.numeric(times$second) %in% c(0:59)){
+      
+      if(as.numeric(times$third) %in% c(0:59)){
+        
+        
+        times &lt;- unite(times, value, first, second, third, sep=&quot;:&quot;, remove = TRUE, ...)
+        times$value
+        
+      } else {
+        
+        print(&quot;Sorry mate, your input is not valid! Please choose a time between 0 and 59 seconds.&quot;)
+        
+      }
+    } else {
+      
+      print(&quot;Sorry mate, your input is not valid! Please choose a time between 0 and 59 minutes.&quot;)
+      
+    }
+  } else {
+    
+    print(&quot;Sorry mate, your input is not valid! Please choose a military time between 0 and 23 hours.&quot;)
+    
+  }
+}
+
+############# A P I ##########################################################################
+ref_general &lt;- function(gen_input = &quot;countries&quot;, ...){
+  
+  info1 &lt;- general_input(gen_input, ...)
+  
+  api_url &lt;- if_else(info1 %in% c(&quot;all&quot;, &quot;summary&quot;, &quot;countries&quot;), 
+                     paste(&quot;https://api.covid19api.com&quot;, info1, sep = &quot;/&quot;), info1, ...)
+  api_url
+  
+}
+
+#dayone all status
+dayone_all_status &lt;- function(country_name = &quot;BB&quot;, ...){
+  
+  info2 &lt;- country(country_name, ...)
+  
+  api_url &lt;- paste(&quot;https://api.covid19api.com/dayone&quot;, info2, sep = &quot;/&quot;, ...)
+  api_url
+  
+}
+
+#dayone with STATUS
+dayone_status &lt;- function(country_name = &quot;BB&quot;, status = &quot;confirmed&quot;, ...){
+  
+  info2 &lt;- country(country_name, ...)
+  info3 &lt;- status_input(status, ...)
+  
+  api_url &lt;- paste(&quot;https://api.covid19api.com/dayone&quot;, info2, info3, sep = &quot;/&quot;, ...)
+  api_url
+  
+}
+
+dayone_status_live &lt;- function(country_name = &quot;BB&quot;, status = &quot;confirmed&quot;, ...){
+  
+  info2 &lt;- country(country_name, ...)
+  info3 &lt;- status_input(status, ...)
+  
+  api_url &lt;- paste(&quot;https://api.covid19api.com/dayone&quot;, info2, info3, &quot;live&quot;, sep = &quot;/&quot;, ...)
+  api_url
+  
+}
+
+#by country ALL status from date time to date time 
+datetime_specific_all_status &lt;- function(country_name=&quot;BB&quot;, date_from=&quot;2020-05-01&quot;, date_to=&quot;2020-05-03&quot;, 
+                                             time_from=&quot;00:00:00&quot;, time_to=&quot;00:00:00&quot;, ...){
+  
+  info2 &lt;- country(country_name, ...)
+  
+  date1 &lt;- date_input_from(date_from, ...)
+  date2 &lt;- date_input_to(date_to, ...)
+  time1 &lt;- time_input_from(time_from, ...)
+  time2 &lt;- time_input_to(time_to, ...)
+  
+  latter &lt;- paste0(&quot;?from=&quot;, date1, &quot;T&quot;, time1, &quot;Z&amp;to=&quot;, date2, &quot;T&quot;, time2, &quot;Z&quot;, ...)
+  api_url &lt;- paste0(&quot;https://api.covid19api.com/&quot;, info2, latter, ...)
+  api_url
+  
+}
+
+#by country with STATUS from date time to date time
+datetime_specific_status &lt;- function(country_name=&quot;BB&quot;, status=&quot;confirmed&quot;, date_from=&quot;2020-05-01&quot;, date_to=&quot;2020-05-03&quot;, 
+                                         time_from=&quot;00:00:00&quot;, time_to=&quot;00:00:00&quot;, ...){
+  
+  info2 &lt;- country(country_name, ...)
+  info3 &lt;- status_input(status, ...)
+  
+  date1 &lt;- date_input_from(date_from, ...)
+  date2 &lt;- date_input_to(date_to, ...)
+  time1 &lt;- time_input_from(time_from, ...)
+  time2 &lt;- time_input_to(time_to, ...)
+  
+  latter &lt;- paste0(&quot;?from=&quot;, date1, &quot;T&quot;, time1, &quot;Z&amp;to=&quot;, date2, &quot;T&quot;, time2, &quot;Z&quot;, ...)
+  api_url &lt;- paste0(&quot;https://api.covid19api.com/&quot;, info2, &quot;/&quot;, info3, latter, ...)
+  api_url
+  
+}
+
+live_all_status &lt;- function(country_name = &quot;BB&quot;, ...){
+  
+    info2 &lt;- country(country_name, ...)
+  
+  api_url &lt;- paste(&quot;https://api.covid19api.com/live&quot;, info2, sep = &quot;/&quot;, ...)
+  api_url
+  
+}
+
+live_status &lt;- function(country_name = &quot;BB&quot;, status = &quot;confirmed&quot;, ...){
+  
+  info2 &lt;- country(country_name, ...)
+  info3 &lt;- status_input(status, ...)
+  
+  api_url &lt;- paste(&quot;https://api.covid19api.com/live&quot;, info2, info3, sep = &quot;/&quot;, ...)
+  api_url
+  
+}
+
+live_status_after_date &lt;- function(country_name = &quot;BB&quot;, status = &quot;confirmed&quot;, 
+                                   date_from=&quot;2020-05-01&quot;, time_from=&quot;00:00:00&quot;, ...){
+  
+  info2 &lt;- country(country_name, ...)
+  info3 &lt;- status_input(status, ...)
+  
+  date1 &lt;- date_input_from(date_from, ...)
+  time1 &lt;- time_input_from(time_from, ...)
+  datetime &lt;- paste0(date_from, &quot;T&quot;, time_from, &quot;Z&quot;, ...)
+  
+  api_url &lt;- paste(&quot;https://api.covid19api.com/live&quot;, info2, info3, &quot;date&quot;, datetime,  sep = &quot;/&quot;, ...)
+  api_url
+  
+}
+
+choose_api &lt;- function(type, ...) {
+  
+  switch(type,
+         
+         general = ref_general(...),
+         option1 = dayone_all_status(...),
+         option2 = dayone_status(...),
+         option3 = dayone_status_live(...),
+         option4 = datetime_specific_all_status(...),
+         option5 = datetime_specific_status(...),
+         option6 = live_all_status(...),
+         option7 = live_status(...),
+         option8 = live_status_after_date(...)
+  )
+}
+
+choose_api(9)
+
+get_data &lt;- function(type, ...){
+  
+  api_url &lt;- choose_api(type, ...)
+  json_data &lt;- GET(api_url)
+  extract_data &lt;- rawToChar(json_data$content)
+  usable_form &lt;- fromJSON(extract_data)
+  usable_form
+  
+}
+
+get_data(3)
+
+
+choose_api(5, &quot;usa&quot;, date_to=&quot;5 6 2021&quot;, time_to=&quot;5:4:23&quot;)</code></pre>
+<table>
+<colgroup>
+<col width="24%" />
+<col width="53%" />
+<col width="22%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function(s)</th>
+<th>Argument(s)</th>
+<th>Default(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ref_general</td>
+<td>gen_input</td>
+<td>None</td>
+</tr>
+<tr class="even">
+<td>—————————-</td>
+<td>————————————————————</td>
+<td>————————-</td>
+</tr>
+<tr class="odd">
+<td>dayone_all_status</td>
+<td>country_name</td>
+<td>country_name = “BB”</td>
+</tr>
+<tr class="even">
+<td>—————————-</td>
+<td>————————————————————</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>dayone_status</td>
+<td>country_name, status</td>
+<td>status = “confirmed”</td>
+</tr>
+<tr class="even">
+<td>—————————-</td>
+<td>————————————————————</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>dayone_status_live</td>
+<td>country_name, status</td>
+<td>date_from = “2020-05-01”</td>
+</tr>
+<tr class="even">
+<td>—————————-</td>
+<td>————————————————————</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>datetime_specific_all_status</td>
+<td>country_name, date_from, date_to, time_from, time_to</td>
+<td>date_to = “2020-05-03”</td>
+</tr>
+<tr class="even">
+<td>—————————-</td>
+<td>————————————————————</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>datetime_specific_status</td>
+<td>country_name, status, date_from, date_to, time_from, time_to</td>
+<td>time_from = “00:00:00”</td>
+</tr>
+<tr class="even">
+<td>—————————-</td>
+<td>————————————————————</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>live_all_status</td>
+<td>country_name</td>
+<td>time_to = “00:00:00”</td>
+</tr>
+<tr class="even">
+<td>—————————-</td>
+<td>————————————————————</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>live_status</td>
+<td>country_name, status</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>—————————-</td>
+<td>————————————————————</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>live_status_after_date</td>
+<td>country_name, status, date_from, time_from</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>general = ref_general(…), option1 = dayone_all_status(…), option2 = dayone_status(…), option3 = dayone_status_live(…), option4 = datetime_specific_all_status(…), option5 = datetime_specific_status(…), option6 = live_all_status(…), option7 = live_status(…), option8 = live_status_after_date(…)</p>
 </div>
 <div id="getting-an-api" class="section level2">
 <h2>Getting an API</h2>
 <pre class="r"><code>library(httr)
-library(jsonlite)</code></pre>
-<pre><code>## Warning: package &#39;jsonlite&#39; was built under R version 4.0.5</code></pre>
-<pre class="r"><code>library(tidyverse)</code></pre>
-<pre><code>## Warning: package &#39;tidyverse&#39; was built under R version 4.0.5</code></pre>
-<pre><code>## -- Attaching packages --------------------------------------- tidyverse 1.3.1 --</code></pre>
-<pre><code>## v ggplot2 3.3.5     v purrr   0.3.4
-## v tibble  3.1.4     v dplyr   1.0.7
-## v tidyr   1.1.3     v stringr 1.4.0
-## v readr   2.0.1     v forcats 0.5.1</code></pre>
-<pre><code>## Warning: package &#39;ggplot2&#39; was built under R version 4.0.5</code></pre>
-<pre><code>## Warning: package &#39;tibble&#39; was built under R version 4.0.5</code></pre>
-<pre><code>## Warning: package &#39;tidyr&#39; was built under R version 4.0.5</code></pre>
-<pre><code>## Warning: package &#39;readr&#39; was built under R version 4.0.5</code></pre>
-<pre><code>## Warning: package &#39;dplyr&#39; was built under R version 4.0.5</code></pre>
-<pre><code>## Warning: package &#39;forcats&#39; was built under R version 4.0.5</code></pre>
-<pre><code>## -- Conflicts ------------------------------------------ tidyverse_conflicts() --
-## x dplyr::filter()  masks stats::filter()
-## x purrr::flatten() masks jsonlite::flatten()
-## x dplyr::lag()     masks stats::lag()</code></pre>
-<pre class="r"><code>dec_1 &lt;- GET(&quot;https://api.covid19api.com/country/united-states/team/north-carolina?from=2020-12-31T00:00:00Z&amp;to=2020-12-31T23:59:59Z&quot;)
+library(jsonlite)
+library(tidyverse)
+library(countrycode)
 
-dec_2 &lt;- rawToChar(dec_1$content)
+dec_1 &lt;- get_data(5, &quot;usa&quot;, date_from=&quot;2020 12 31&quot;, date_to=&quot;2020 12 31&quot;, time_to=&quot;23:59:59&quot;)
+jan_1 &lt;- get_data(5, &quot;usa&quot;, date_from=&quot;2021 1 31&quot;, date_to=&quot;2021 1 31&quot;, time_to=&quot;23:59:59&quot;)
+feb_1 &lt;- get_data(5, &quot;usa&quot;, date_from=&quot;2021 2 28&quot;, date_to=&quot;2021 2 28&quot;, time_to=&quot;23:59:59&quot;)
+mar_1 &lt;- get_data(5, &quot;usa&quot;, date_from=&quot;2021 3 31&quot;, date_to=&quot;2021 3 31&quot;, time_to=&quot;23:59:59&quot;)
+apr_1 &lt;- get_data(5, &quot;usa&quot;, date_from=&quot;2021 4 30&quot;, date_to=&quot;2021 4 30&quot;, time_to=&quot;23:59:59&quot;)
+may_1 &lt;- get_data(5, &quot;usa&quot;, date_from=&quot;2021 5 31&quot;, date_to=&quot;2021 5 31&quot;, time_to=&quot;23:59:59&quot;)
+jun_1 &lt;- get_data(5, &quot;usa&quot;, date_from=&quot;2021 6 30&quot;, date_to=&quot;2021 6 30&quot;, time_to=&quot;23:59:59&quot;)
+jul_1 &lt;- get_data(5, &quot;usa&quot;, date_from=&quot;2021 7 31&quot;, date_to=&quot;2021 7 31&quot;, time_to=&quot;23:59:59&quot;)
+aug_1 &lt;- get_data(5, &quot;usa&quot;, date_from=&quot;2021 8 31&quot;, date_to=&quot;2021 8 31&quot;, time_to=&quot;23:59:59&quot;)
+sep_1 &lt;- get_data(5, &quot;usa&quot;, date_from=&quot;2021 9 30&quot;, date_to=&quot;2021 9 30&quot;, time_to=&quot;23:59:59&quot;)
 
-dec_3 &lt;- fromJSON(dec_2)
-
-head(dec_3)</code></pre>
-<pre><code>## $message
-## [1] &quot;Not Found&quot;</code></pre>
-<pre class="r"><code>#dec_4 &lt;- dec_3 %&gt;% select(Province, Deaths, Active, Date) </code></pre>
+dec_4 &lt;- dec_1 %&gt;% select(Province, Confirmed, Deaths, Active, Date) 
+jan_4 &lt;- jan_1 %&gt;% select(Province, Confirmed, Deaths, Active, Date)
+feb_4 &lt;- feb_1 %&gt;% select(Province, Confirmed, Deaths, Active, Date)
+mar_4 &lt;- mar_1 %&gt;% select(Province, Confirmed, Deaths, Active, Date)
+apr_4 &lt;- apr_1 %&gt;% select(Province, Confirmed, Deaths, Active, Date)
+may_4 &lt;- may_1 %&gt;% select(Province, Confirmed, Deaths, Active, Date)
+jun_4 &lt;- jun_1 %&gt;% select(Province, Confirmed, Deaths, Active, Date)
+jul_4 &lt;- jul_1 %&gt;% select(Province, Confirmed, Deaths, Active, Date)
+aug_4 &lt;- aug_1 %&gt;% select(Province, Confirmed, Deaths, Active, Date)
+sep_4 &lt;- sep_1 %&gt;% select(Province, Confirmed, Deaths, Active, Date)</code></pre>
 <pre class="r"><code>library(httr)
 library(jsonlite)
 library(tidyverse)

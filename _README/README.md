@@ -350,7 +350,7 @@ dayone_all_status <- function(country_name = "BB", ...){
 }
 
 #dayone with STATUS
-dayone_status <- function(country_name = "BB", status = "con", ...){
+dayone_status <- function(country_name = "BB", status = "confirmed", ...){
   
   info2 <- country(country_name, ...)
   info3 <- status_input(status, ...)
@@ -360,7 +360,7 @@ dayone_status <- function(country_name = "BB", status = "con", ...){
   
 }
 
-dayone_status_live <- function(country_name = "BB", status = "con", ...){
+dayone_status_live <- function(country_name = "BB", status = "confirmed", ...){
   
   info2 <- country(country_name, ...)
   info3 <- status_input(status, ...)
@@ -388,7 +388,7 @@ datetime_specific_all_status <- function(country_name="BB", date_from="2020-05-0
 }
 
 #by country with STATUS from date time to date time
-datetime_specific_status <- function(country_name="BB", status="con", date_from="2020-05-01", date_to="2020-05-03", 
+datetime_specific_status <- function(country_name="BB", status="confirmed", date_from="2020-05-01", date_to="2020-05-03", 
                                          time_from="00:00:00", time_to="00:00:00", ...){
   
   info2 <- country(country_name, ...)
@@ -414,7 +414,7 @@ live_all_status <- function(country_name = "BB", ...){
   
 }
 
-live_status <- function(country_name = "BB", status = "con", ...){
+live_status <- function(country_name = "BB", status = "confirmed", ...){
   
   info2 <- country(country_name, ...)
   info3 <- status_input(status, ...)
@@ -424,7 +424,7 @@ live_status <- function(country_name = "BB", status = "con", ...){
   
 }
 
-live_status_after_date <- function(country_name = "BB", status = "con", 
+live_status_after_date <- function(country_name = "BB", status = "confirmed", 
                                    date_from="2020-05-01", time_from="00:00:00", ...){
   
   info2 <- country(country_name, ...)
@@ -473,6 +473,32 @@ get_data(3)
 choose_api(5, "usa", date_to="5 6 2021", time_to="5:4:23")
 ```
 
+| Function(s)                     | Argument(s)                                                       | Default(s)                |
+|---------------------------------|-------------------------------------------------------------------|---------------------------|
+| ref\_general                    | gen\_input                                                        | None                      |
+| —————————-                      | ————————————————————                                              | ————————-                 |
+| dayone\_all\_status             | country\_name                                                     | country\_name = “BB”      |
+| —————————-                      | ————————————————————                                              |                           |
+| dayone\_status                  | country\_name, status                                             | status = “confirmed”      |
+| —————————-                      | ————————————————————                                              |                           |
+| dayone\_status\_live            | country\_name, status                                             | date\_from = “2020-05-01” |
+| —————————-                      | ————————————————————                                              |                           |
+| datetime\_specific\_all\_status | country\_name, date\_from, date\_to, time\_from, time\_to         | date\_to = “2020-05-03”   |
+| —————————-                      | ————————————————————                                              |                           |
+| datetime\_specific\_status      | country\_name, status, date\_from, date\_to, time\_from, time\_to | time\_from = “00:00:00”   |
+| —————————-                      | ————————————————————                                              |                           |
+| live\_all\_status               | country\_name                                                     | time\_to = “00:00:00”     |
+| —————————-                      | ————————————————————                                              |                           |
+| live\_status                    | country\_name, status                                             |                           |
+| —————————-                      | ————————————————————                                              |                           |
+| live\_status\_after\_date       | country\_name, status, date\_from, time\_from                     |                           |
+
+general = ref\_general(…), option1 = dayone\_all\_status(…), option2 =
+dayone\_status(…), option3 = dayone\_status\_live(…), option4 =
+datetime\_specific\_all\_status(…), option5 =
+datetime\_specific\_status(…), option6 = live\_all\_status(…), option7 =
+live\_status(…), option8 = live\_status\_after\_date(…)
+
 ## Getting an API
 
 ``` r
@@ -491,6 +517,17 @@ jun_1 <- get_data(5, "usa", date_from="2021 6 30", date_to="2021 6 30", time_to=
 jul_1 <- get_data(5, "usa", date_from="2021 7 31", date_to="2021 7 31", time_to="23:59:59")
 aug_1 <- get_data(5, "usa", date_from="2021 8 31", date_to="2021 8 31", time_to="23:59:59")
 sep_1 <- get_data(5, "usa", date_from="2021 9 30", date_to="2021 9 30", time_to="23:59:59")
+
+dec_4 <- dec_1 %>% select(Province, Confirmed, Deaths, Active, Date) 
+jan_4 <- jan_1 %>% select(Province, Confirmed, Deaths, Active, Date)
+feb_4 <- feb_1 %>% select(Province, Confirmed, Deaths, Active, Date)
+mar_4 <- mar_1 %>% select(Province, Confirmed, Deaths, Active, Date)
+apr_4 <- apr_1 %>% select(Province, Confirmed, Deaths, Active, Date)
+may_4 <- may_1 %>% select(Province, Confirmed, Deaths, Active, Date)
+jun_4 <- jun_1 %>% select(Province, Confirmed, Deaths, Active, Date)
+jul_4 <- jul_1 %>% select(Province, Confirmed, Deaths, Active, Date)
+aug_4 <- aug_1 %>% select(Province, Confirmed, Deaths, Active, Date)
+sep_4 <- sep_1 %>% select(Province, Confirmed, Deaths, Active, Date)
 ```
 
 ``` r
