@@ -3,24 +3,25 @@ ST558 - Vignette Project - Covid-19 Data
 Jasmine Wang
 10/07/2021
 
--   [Required Packages](#required-packages)
--   [Writing Functions](#writing-functions)
--   [Getting an API](#getting-an-api)
-    -   [Getting Data](#getting-data)
-    -   [Data Manipulation](#data-manipulation)
-    -   [Creating Variables](#creating-variables)
-    -   [Creating an Infix Function and Categorical
-        Variables](#creating-an-infix-function-and-categorical-variables)
--   [Contingency Tables](#contingency-tables)
--   [Numerical Summaries](#numerical-summaries)
--   [Explanatory Data Analysis](#explanatory-data-analysis)
-    -   [Barplots](#barplots)
-    -   [Boxplots](#boxplots)
-    -   [Scatterplot](#scatterplot)
-    -   [Histogram](#histogram)
-    -   [Line Plots](#line-plots)
--   [Welcome to GitHub Pages](#welcome-to-github-pages)
-    -   [Markdown](#markdown)
+-   [Goal of Vignette](#goal-of-vignette)
+    -   [Required Packages](#required-packages)
+-   [Customized Functions](#customized-functions)
+    -   [A List of Customized
+        Functions](#a-list-of-customized-functions)
+    -   [A List of Input Arguments and their
+        Defaults](#a-list-of-input-arguments-and-their-defaults)
+    -   [Using an API](#using-an-api)
+-   [Getting the Data](#getting-the-data)
+    -   [Combining Date Sets](#combining-date-sets)
+-   [Data Manipulation](#data-manipulation)
+    -   [Creating Numeric Variables](#creating-numeric-variables)
+    -   [Creating Categorical
+        Variables](#creating-categorical-variables)
+-   [Exploratory Data Analysis](#exploratory-data-analysis)
+    -   [Contingency Tables](#contingency-tables)
+    -   [Numerical Summaries](#numerical-summaries)
+    -   [Visualization](#visualization)
+    -   [Conclusion](#conclusion)
     -   [Jekyll Themes](#jekyll-themes)
     -   [Support or Contact](#support-or-contact)
 -   [R Markdown](#r-markdown)
@@ -37,7 +38,48 @@ rmarkdown::render("C:/Users/peach/Documents/ST558/ST558_repos/vignette_project/_
 )
 ```
 
-## Required Packages
+## Goal of Vignette
+
+Since Covid-19 wide-spread the whole globe, most of people’s lives have
+been affected and even changed. However, with the administration of
+vaccination, we all hope to get back to the life it was like before. To
+do this, we need to get the majority population vaccination rate up to
+more than 70% for the community immunity to take effect. The purpose of
+this vignette is to see how the vaccination and state-mandated
+regulations have affected the active cases and deaths across the United
+States. Therefore, we are going to sum up all the active cases and
+deaths for each state and each month. Then, we will look at nite months
+of state-wide data about the active cases and deaths starting from
+January 2021.
+
+We will divide the months into three different timelines:
+
+-   *Vaccinat-ING*: January, February, March, April  
+-   *Some vaccinated*: May, June, July  
+-   *Back to school*: August, September
+
+During each timeline, we can see how the number of active cases and
+deaths are affected by these events.
+
+The criteria I am using is based on vaccination progress in North
+Carolina. Since all groups are open to vaccination on April 7th, 2021,
+and it takes roughly four weeks to develop full immunity, I categorized
+the timeline before May to be on-going vaccination period while the
+antibodies against the virus are still developing. The months between
+May and July are when approximately 40% of the general population are
+vaccinated with at least one shot. Then, the students are going back to
+school in person in August and September. We will see how during these
+different timelines are the active cases and deaths changed in the
+exploratory data analysis section.
+
+Therefore, the goal of this vignette is to create functions to help
+users query Covid-19 related data from [Covid-19 API
+site](https://covid19api.com) and parse the data into a nicely formatted
+tibble or data frame. Upon obtaining the data, we can then use it to
+perform some exploratory data analysis such as numerical summaries and
+plots for better visualization.
+
+### Required Packages
 
 Below is a list of packages needed to create the vignette:
 
@@ -450,25 +492,27 @@ live_status_after_date <- function(country_name = "BB", status = "confirmed",
 }
 ```
 
-## Writing Functions
+## Customized Functions
 
-I wrote some mini-functions so that the input arguments are
-user-friendly to query the Covid-19 data from [Covid-19
-API](https://covid19api.com/). I created a wrapper function,
-`choose_api`, which contains nine customized functions to obtain the
-correct API URL to query the data needed for the users. Users only need
-to supply with arguments like the country they want to query from,
-status of the query (total confirmed cases, recovered cases, or number
-of deaths), and starting at certain date and time they want to query the
-data. Users can use `choose_api` function to check if their query API
-URL is correct to query the data they need. Then, they can use the exact
-same arguments they used in the `choose_api` function in the `get_data`
-function to obtain the parsed data in a usable form. Thus, if the API
-URL obtained from `choose_api` function is not correct, those same
-arguments are surely not going to work in the `get_data` function.
-Therefore, `choose_api` function is a way to see if the user-supplied
-arguments are correct, and the obtained API URL is what the users want
-to query.
+I created some customized functions implemented with some user-friendly
+input arguments to query the Covid-19 data from [Covid-19
+API](https://covid19api.com/). Then, I created a wrapper function,
+`choose_api`, which contains those nine customized functions to obtain
+the correct API URL to query the data needed for the users. Users would
+only need to supply with arguments like the country they want to query
+from, status of the query (total confirmed cases, recovered cases, or
+number of deaths), and starting from certain date and time they want to
+query the data. Users can use `choose_api` function to check if their
+query API URL is correct to query the data they need. Then, they can use
+the exact same arguments they used in the `choose_api` function in the
+`get_data` function to obtain the parsed data in a usable form. Thus, if
+the API URL obtained from `choose_api` function is not correct, those
+same arguments are surely not going to work in the `get_data` function.
+Therefore, `choose_api` function is a way to make sure if the
+user-supplied arguments are correct, and the obtained API URL is what
+the users want to query.
+
+### A List of Customized Functions
 
 Let’s look at the options of the data the customized functions can
 query:
@@ -544,8 +588,11 @@ is:
     to” -&gt; “time from” -&gt; “time to”
 
 If the desired API URL the users get from the `choose_api` function is
-correct, the same exact arguments used in `choose_api` will be used
+correct, the same exact arguments used in `choose_api` should be used
 again in `get_data` function to query the data from Covid-19 API site.
+For more information about what the API URL should look like, please
+visit the [Covid-19 API
+site](https://documenter.getpostman.com/view/10808728/SzS8rjbc).
 
 ``` r
 choose_api <- function(type, ...) {
@@ -574,6 +621,8 @@ get_data <- function(type, ...){
   
 }
 ```
+
+### A List of Input Arguments and their Defaults
 
 The table below show a list of customized API functions with their
 corresponding arguments and defaults set.
@@ -634,28 +683,31 @@ Let’s look at the options each argument can take:
         “01:04:05”).  
     -   Default for both `time_from` and `time_to` is "00:00:00:
 
-Note: If users do not supply any argument inputs but simply choose an
+**Note: If users do not supply any argument inputs but simply choose an
 option function to guery the data, it will return cases results for
 Barbados from May 1st, 2020, at time 00:00:00 to May 3rd, 2020, at time
-00:00:00.
+00:00:00.**
 
-Note2: Free API query does not require a key for this Covid-19 API site.
-However,!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+**Note 2: Free API query does not require a key for the Covid-19 API
+site. However, free queries have limited access and functionality. For
+example, free queries can only query up to a week of data at once. So,
+if you need to query a month of data. you will have to run the query
+four times with different date inputs.**
 
-## Getting an API
+### Using an API
 
-Below is the API URL I used in the `get_data` function I created to
-query the data for all cases type for the United States from January
-3rd, 2021 to January 5th, 2021 (3 days). We can see it returns for
-10,000 rows and 13 columns including every city from every state in the
-United States for 3 days worth of all cases type of data. I realized by
-looking at this example data that all cases types are accumulated up
-untill the date/time queried. If I want to calculate all cases types for
-each month for each state in the United States, I can query one day of
-data at the end of each month, group by each state and sum up all
-different cases type, subtrack them from the previous end of month one
-day data. Then, we will have the number of all cases types per state per
-month, not cumulatively. Let’s see if this works!
+Below is the API URL used with `get_data` function I created to query
+the data for all cases type for the United States from January 3rd, 2021
+to January 5th, 2021 (3 days). We can see it returns for 10,000 rows and
+13 columns including every city from every state in the United States
+for 3 days worth of all cases type of data. I realized by looking at
+this example data that all cases types are accumulated up untill the
+date/time queried. If I want to calculate all cases types for each month
+for each state in the United States, I can query one day of data at the
+end of each month, group by each state and sum up all different cases
+type, subtract them from the previous end of month one day data. Then,
+we will have the number of all cases types per state per month, not
+cumulatively. Let’s see if this works!
 
 ``` r
 choose_api(5, "usa", date_from="2021 1 3", date_to="2021 1 5", time_to="23:59:59")
@@ -664,7 +716,9 @@ test_data <- test_data %>% group_by(City)
 test_data
 ```
 
-### Getting Data
+## Getting the Data
+
+### Combining Date Sets
 
 Since the free Covid-19 data query does not require a key and has
 limited access/queries. For instance, each time we make a request to
@@ -683,13 +737,15 @@ shown below so that I can compute the following tasks.
 
 -   Total confirmed cases/month, state = Confirmed\_cases -
     Confirmed\_cases2  
--   Total number of deaths/month, state = Deaths\_1 - Deaths\_2
+-   Total number of deaths/month, state = Deaths\_1 - Deaths\_2 …
 
 | Province       | Confirmed\_cases | Confirmed\_cases2 | Deaths\_1      | Deaths\_2      | Month    |
 |----------------|------------------|-------------------|----------------|----------------|----------|
 | North Carolina | 4569 (Jan 2021)  | 4123 (Dec 2020)   | 568 (Jan 2021) | 538 (Dec 2020) | January  |
 | North Carolina | 5638 (Feb 2021)  | 4569 (Jan 2021)   | 588 (Feb 2021) | 568 (Jan 2021) | February |
 | North Carolina | 5883 (Mar 2021)  | 5638 (Feb 2021)   | 638 (Mar 2021) | 588 (Feb 2021) | March    |
+
+…
 
 ``` r
 dec <- get_data(5, "usa", date_from="2020 12 31", date_to="2020 12 31", time_to="23:59:59")
@@ -718,7 +774,7 @@ late_date <- rbind(jan_2, feb_2, mar_2, apr_2, may_2, jun_2, jul_2, aug_2, sep_2
 early_date <- rbind(dec_2, jan_2, feb_2, mar_2, apr_2, may_2, jun_2, jul_2, aug_2)
 ```
 
-### Data Manipulation
+## Data Manipulation
 
 At this point, I have data from every city in each state. So, I grouped
 by *Province* and *Date* and sum up all different case types for each
@@ -762,7 +818,7 @@ mydata1
     ## 10 Alaska   2021-01-31T00:00:00Z     54350    262  54088 Alaska  2020-12-31T00:00:00Z      47014     206   46808
     ## # ... with 512 more rows
 
-### Creating Variables
+### Creating Numeric Variables
 
 Now we are ready to subtract each case type from itself from the
 previous month and obtain the total number of confirmed cases, active
@@ -814,16 +870,16 @@ mydata2
 # write_csv(x = mydata2, path = "../_Data/covid_data.csv")
 ```
 
-### Creating an Infix Function and Categorical Variables
+### Creating Categorical Variables
 
-Upon inspecting the data, I discovered eight states I did not want to be
-included in the data analysis. So, I created an infix function, `%!in%`,
-that is negation of the infix function, `%in%`. I used it to filter the
-rows whenever *Province* contains those states. These states I excluded
-from the data are: “American Samoa”, “Diamond Princess”, “Grand
-Princess”, “Guam”, “Northern Mariana Islands”, “Puerto Rico” and “Virgin
-Islands”. They may be potential outliers since their number of cases may
-be really low for each case type.
+Upon inspecting the data, I discovered eight states I wanted to be
+excluded from the data analysis. So, I created an infix function,
+`%!in%`, that is negation of the infix function, `%in%`. I used it to
+filter the rows whenever *Province* contains those states. These states
+I excluded from the data are: “American Samoa”, “Diamond Princess”,
+“Grand Princess”, “Guam”, “Northern Mariana Islands”, “Puerto Rico” and
+“Virgin Islands”. They may be potential outliers since their number of
+cases may be really low for each case type.
 
 I used `mutate` function to create three categorical variables using the
 numerical variables we just obtained.
@@ -836,8 +892,8 @@ numerical variables we just obtained.
     -   Between 9,000 and 30,000 cases  
     -   More than 30,000 cases
 -   *vaccine* (3 levels):
-    -   Vaccine-ING (Jan, Feb, Mar, Apr)  
-    -   Some vaccined (May, Jun, Jul)  
+    -   Vaccinat-ING (Jan, Feb, Mar, Apr)  
+    -   Some vaccinated (May, Jun, Jul)  
     -   Back to school (Aug, Sep)
 
 ``` r
@@ -852,22 +908,24 @@ mydata3 <- mydata2 %>% filter(Province %!in% c("American Samoa", "Diamond Prince
 
 mydata3$f500_deaths <- cut(mydata3$f500_deaths, 2, c("Less than 500 deaths", "More than 500 deaths"))
 mydata3$Total_cases <- cut(mydata3$Total_cases, 3, c("Less than 9,000 cases", "Between 9,000 and 30,000 cases", "More than 30,000 cases"))
-mydata3$vaccine <- cut(mydata3$vaccine, 3, c("Vaccine-ING", "Some vaccined", "Back to school"))
+mydata3$vaccine <- cut(mydata3$vaccine, 3, c("Vaccinat-ING", "Some vaccinated", "Back to school"))
 ```
 
-## Contingency Tables
+## Exploratory Data Analysis
+
+### Contingency Tables
 
 Now we have 51 states, and each state has nine months worth of data.
 Therefore, 51 x 9 = 459 rows in the data. Each event in Table 1
-represents one state and one month. However, since “Vaccine-ing” period
-has 4 months, “Some vaccined” period contains 3 months and “Back to
+represents one state and one month. However, since “vaccinat-ing” period
+has 4 months, “Some vaccinated” period contains 3 months and “Back to
 school” period only has 2 months, the data is not on a even scale for
 the three categories. Hence, we cannot compare them across columns. We
 can only compare them down the rows within each column.
 
-During the “Vaccine-ING” period (Jan-Apr), most of the states appeared
+During the “vaccinat-ing” period (Jan-Apr), most of the states appeared
 with more than 30,000 cases per month. However, that number dropped
-during “Some vaccined” period (May-Jul). A lot of the events
+during “Some vaccinated” period (May-Jul). A lot of the events
 (month&state) were having less than 9,000 cases. This incident should
 tell us that the Covid-19 vaccines were working its magic during this
 time. Unfortunately, the number of events went back up to having more
@@ -878,9 +936,9 @@ Table 2 and Table 3 show the total confirmed cases and total number of
 deaths between the states known to have the most cases from January to
 September 2021 compared to North Carolina. One interesting finding is
 that the number of total confirmed cases were slowly dropping for each
-state during “Vaccine-ing” period and then reached the minimum number of
-cases of all time during “some vaccined” period. However, that number
-went back up when students went back to schools. The number total
+state during “vaccinat-ing” period and then reached the minimum number
+of cases of all time during “some vaccinated” period. However, that
+number went back up when students went back to schools. The number total
 confirmed cases were almost equivalent to those numbers back in January
 for most states. This is why state of North Carolina reinforced the mask
 mandate again in August 2021.
@@ -895,11 +953,11 @@ these data with different plots in the plots section.
 table(mydata3$Total_cases, mydata3$vaccine) %>% kable(caption = "Table 1. Total Confirmed Cases vs. Vaccine Timeline")
 ```
 
-|                                | Vaccine-ING | Some vaccined | Back to school |
-|:-------------------------------|------------:|--------------:|---------------:|
-| Less than 9,000 cases          |          46 |            79 |             10 |
-| Between 9,000 and 30,000 cases |          63 |            51 |             24 |
-| More than 30,000 cases         |          95 |            23 |             68 |
+|                                | Vaccinat-ING | Some vaccinated | Back to school |
+|:-------------------------------|-------------:|----------------:|---------------:|
+| Less than 9,000 cases          |           46 |              79 |             10 |
+| Between 9,000 and 30,000 cases |           63 |              51 |             24 |
+| More than 30,000 cases         |           95 |              23 |             68 |
 
 Table 1. Total Confirmed Cases vs. Vaccine Timeline
 
@@ -941,19 +999,19 @@ mydata3 %>% filter(Province %in% c("California", "New York", "Florida", "Texas",
 
 Table 3. Total Confirmed Cases for Each Month across Different States
 
-## Numerical Summaries
+### Numerical Summaries
 
 Table 4 and Table 5 shows the numerical summaries of active cases and
 deaths during each vaccine timeline for North Carolina and its
 neighbors. North Carolina was placed pretty high regarding to the active
 cases for each timeline right below Georgia, followed by Tennessee.
 Shockingly, the average active cases for “back to school” period all
-exceeded the average active cases for “vaccine-ing” period for every
+exceeded the average active cases for “vaccinat-ing” period for every
 state with Virginia being a close-call. The number was almost doubled
 for some states or more than doubled for Tennessee. This indicates that
 “back to school” event drove the number of cases up in each state and
 counterattacked the great effect brought by wide-spread vaccine
-administration. The effect of vaccine is shown in the “some vaccined”
+administration. The effect of vaccine is shown in the “some vaccinated”
 period that drove the average active cases down.
 
 However, the effect of “going back to school” event is not as dramatic
@@ -973,23 +1031,23 @@ mydata3 %>% filter(Province %in% c("North Carolina", "South Carolina", "Tennesse
   kable(digit = 2, caption = "Table 4. Active cases per vaccine timeline for North Carolina and its neighbors.")
 ```
 
-| Province       | vaccine        | Avg\_active | SD\_active | Median\_active | IQR\_active |
-|:---------------|:---------------|------------:|-----------:|---------------:|------------:|
-| Georgia        | Vaccine-ING    |   106119.75 |   92096.53 |        72623.0 |    82090.25 |
-| Georgia        | Some vaccined  |    25925.33 |   17422.78 |        23007.0 |    17238.50 |
-| Georgia        | Back to school |   197429.50 |   36259.73 |       197429.5 |    25639.50 |
-| North Carolina | Vaccine-ING    |   106076.00 |   75806.97 |        77113.0 |    73225.50 |
-| North Carolina | Some vaccined  |    25780.00 |   11890.50 |        30975.0 |    11006.50 |
-| North Carolina | Back to school |   172144.50 |   10464.47 |       172144.5 |     7399.50 |
-| South Carolina | Vaccine-ING    |    66737.75 |   49099.03 |        53070.0 |    55158.25 |
-| South Carolina | Some vaccined  |    12694.00 |    8488.12 |        14364.0 |     8364.00 |
-| South Carolina | Back to school |   118835.00 |    1965.76 |       118835.0 |     1390.00 |
-| Tennessee      | Vaccine-ING    |    63834.50 |   49860.35 |        40863.5 |    32533.00 |
-| Tennessee      | Some vaccined  |    15199.00 |   11000.60 |        14727.0 |    10993.00 |
-| Tennessee      | Back to school |   166274.00 |   12406.90 |       166274.0 |     8773.00 |
-| Virginia       | Vaccine-ING    |    76067.00 |   53515.94 |        55204.5 |    49384.50 |
-| Virginia       | Some vaccined  |    11344.00 |    5918.52 |        13927.0 |     5479.50 |
-| Virginia       | Back to school |    85587.00 |   19581.20 |        85587.0 |    13846.00 |
+| Province       | vaccine         | Avg\_active | SD\_active | Median\_active | IQR\_active |
+|:---------------|:----------------|------------:|-----------:|---------------:|------------:|
+| Georgia        | Vaccinat-ING    |   106119.75 |   92096.53 |        72623.0 |    82090.25 |
+| Georgia        | Some vaccinated |    25925.33 |   17422.78 |        23007.0 |    17238.50 |
+| Georgia        | Back to school  |   197429.50 |   36259.73 |       197429.5 |    25639.50 |
+| North Carolina | Vaccinat-ING    |   106076.00 |   75806.97 |        77113.0 |    73225.50 |
+| North Carolina | Some vaccinated |    25780.00 |   11890.50 |        30975.0 |    11006.50 |
+| North Carolina | Back to school  |   172144.50 |   10464.47 |       172144.5 |     7399.50 |
+| South Carolina | Vaccinat-ING    |    66737.75 |   49099.03 |        53070.0 |    55158.25 |
+| South Carolina | Some vaccinated |    12694.00 |    8488.12 |        14364.0 |     8364.00 |
+| South Carolina | Back to school  |   118835.00 |    1965.76 |       118835.0 |     1390.00 |
+| Tennessee      | Vaccinat-ING    |    63834.50 |   49860.35 |        40863.5 |    32533.00 |
+| Tennessee      | Some vaccinated |    15199.00 |   11000.60 |        14727.0 |    10993.00 |
+| Tennessee      | Back to school  |   166274.00 |   12406.90 |       166274.0 |     8773.00 |
+| Virginia       | Vaccinat-ING    |    76067.00 |   53515.94 |        55204.5 |    49384.50 |
+| Virginia       | Some vaccinated |    11344.00 |    5918.52 |        13927.0 |     5479.50 |
+| Virginia       | Back to school  |    85587.00 |   19581.20 |        85587.0 |    13846.00 |
 
 Table 4. Active cases per vaccine timeline for North Carolina and its
 neighbors.
@@ -1001,160 +1059,327 @@ mydata3 %>% filter(Province %in% c("North Carolina", "South Carolina", "Tennesse
   kable(digit = 2, caption = "Table 5. Number of deaths per vaccine timeline for North Carolina and its neighbors.")
 ```
 
-| Province       | vaccine        | Average |      SD | Median |     IQR |
-|:---------------|:---------------|--------:|--------:|-------:|--------:|
-| Georgia        | Vaccine-ING    | 2314.00 | 1034.82 | 2428.5 | 1535.00 |
-| Georgia        | Some vaccined  |  495.33 |  212.07 |  586.0 |  197.00 |
-| Georgia        | Back to school | 2204.00 | 1612.20 | 2204.0 | 1140.00 |
-| North Carolina | Vaccine-ING    | 1475.75 |  931.82 | 1388.5 | 1244.75 |
-| North Carolina | Some vaccined  |  328.00 |  117.61 |  359.0 |  114.50 |
-| North Carolina | Back to school | 1444.50 |  864.79 | 1444.5 |  611.50 |
-| South Carolina | Vaccine-ING    | 1050.25 |  678.63 | 1052.0 | 1026.75 |
-| South Carolina | Some vaccined  |  135.67 |   89.49 |   85.0 |   78.00 |
-| South Carolina | Back to school | 1284.00 |  834.39 | 1284.0 |  590.00 |
-| Tennessee      | Vaccine-ING    | 1322.50 | 1148.63 | 1127.0 | 1563.50 |
-| Tennessee      | Some vaccined  |  175.67 |   62.63 |  162.0 |   61.50 |
-| Tennessee      | Back to school | 1209.00 |  643.47 | 1209.0 |  455.00 |
-| Virginia       | Vaccine-ING    | 1434.50 |  667.72 | 1566.0 |  593.50 |
-| Virginia       | Some vaccined  |  254.00 |  151.06 |  229.0 |  149.50 |
-| Virginia       | Back to school |  609.00 |  422.85 |  609.0 |  299.00 |
+| Province       | vaccine         | Average |      SD | Median |     IQR |
+|:---------------|:----------------|--------:|--------:|-------:|--------:|
+| Georgia        | Vaccinat-ING    | 2314.00 | 1034.82 | 2428.5 | 1535.00 |
+| Georgia        | Some vaccinated |  495.33 |  212.07 |  586.0 |  197.00 |
+| Georgia        | Back to school  | 2204.00 | 1612.20 | 2204.0 | 1140.00 |
+| North Carolina | Vaccinat-ING    | 1475.75 |  931.82 | 1388.5 | 1244.75 |
+| North Carolina | Some vaccinated |  328.00 |  117.61 |  359.0 |  114.50 |
+| North Carolina | Back to school  | 1444.50 |  864.79 | 1444.5 |  611.50 |
+| South Carolina | Vaccinat-ING    | 1050.25 |  678.63 | 1052.0 | 1026.75 |
+| South Carolina | Some vaccinated |  135.67 |   89.49 |   85.0 |   78.00 |
+| South Carolina | Back to school  | 1284.00 |  834.39 | 1284.0 |  590.00 |
+| Tennessee      | Vaccinat-ING    | 1322.50 | 1148.63 | 1127.0 | 1563.50 |
+| Tennessee      | Some vaccinated |  175.67 |   62.63 |  162.0 |   61.50 |
+| Tennessee      | Back to school  | 1209.00 |  643.47 | 1209.0 |  455.00 |
+| Virginia       | Vaccinat-ING    | 1434.50 |  667.72 | 1566.0 |  593.50 |
+| Virginia       | Some vaccinated |  254.00 |  151.06 |  229.0 |  149.50 |
+| Virginia       | Back to school  |  609.00 |  422.85 |  609.0 |  299.00 |
 
 Table 5. Number of deaths per vaccine timeline for North Carolina and
 its neighbors.
 
-## Explanatory Data Analysis
+### Visualization
 
-### Barplots
+#### Bar-Plots
 
-### Boxplots
+We combined with the findings we learnt from Table 1, Table 2 and Table
+3 and showed them in Figure 1 and Figure 2 below.
 
-### Scatterplot
+Figure 1 and Figure 2 show the average number of active cases and deaths
+at each vaccine timeline for the states known to have the most cases.
+Comparing both figures, relatively speaking, even when “back to school”
+event took its effect on the increased number of active cases during the
+same period, the average number of deaths dropped at the same period for
+most states but not for Florida. This could be due to its residents
+being mostly retired individuals in Florida, and thus, the average age
+of the residents is higher than most states in Florida. Older
+individuals normally have lower immunity despite vaccine shots, and they
+face a lower than average odds again the virus. However, with the
+average number of active cases increased in the “back to school” period
+and exceeded the number in the first period for California, Florida,
+North Carolina and Texas, the average number of deaths dropped in the
+third period relative to the average number of deaths in the first
+period for California, North Carolina and Texas.
 
-### Histogram
-
-### Line Plots
+Again, the wide-spread vaccine administration across US is working, and
+those individuals who received shots are developing antibodies against
+the virus. Thus, the average number of deaths was not elevated for most
+states even when students were going back to school.
 
 ``` r
-library(tidyverse)
-library(ggplot2)
-
-barplot1 <- summary3 %>% filter(Province %in% c("California", "New York", "Florida", "Texas", "Michigan", "North Carolina"))
-g <- ggplot(data = barplot1, aes(x = Province, y = avg_total, fill = vaccine))
-g + geom_bar(stat = "identity", position = "dodge") + 
-  labs(x = "State", y = "Average Total Cases", title = "Figure 1. Average total cases at each timeline for each state") + 
-  scale_fill_discrete(name = "Vaccine timeline") + 
-  theme(axis.text.x = element_text(angle = 45, size = 10), 
-        axis.text.y = element_text(size = 10), 
-        axis.title.x = element_text(size = 13), 
-        axis.title.y = element_text(size = 13), 
-        legend.key.size = unit(1, 'cm'), 
-        legend.text = element_text(size = 13), 
-        title = element_text(size = 15))
-
-barplot2 <- summary4 %>% filter(Province %in% c("California", "New York", "Florida", "Texas", "Michigan", "North Carolina"))
-d <- ggplot(data = barplot2, aes(x = Province, y = avg_death, fill = vaccine))
-d + geom_bar(stat = "identity", position = "dodge") + 
-  labs(x = "State", y = "Average Total Cases", title = "Figure 2. Average total deaths at each timeline for each state") + 
-  scale_fill_discrete(name = "Vaccine timeline") + 
-  theme(axis.text.x = element_text(angle = 45, size = 10), 
-        axis.text.y = element_text(size = 10), 
-        axis.title.x = element_text(size = 13), 
-        axis.title.y = element_text(size = 13), 
-        legend.key.size = unit(1, 'cm'), 
-        legend.text = element_text(size = 13), 
-        title = element_text(size = 15))
-
-# mydata3
-
-boxplot1 <- ggplot(data = mydata3, aes(x = vaccine, y = Total))
-boxplot1 + geom_boxplot(fill = "white", outlier.shape = NA) + 
-  coord_cartesian(ylim=c(0, 300000)) + 
-  geom_jitter(aes(color = vaccine), size = 3) + 
-  labs(title = "Figure 3. Boxplot for total number of cases") + 
-  theme(axis.text.x = element_text(size = 10), 
-        axis.text.y = element_text(size = 10), 
-        axis.title.x = element_text(size = 15), 
-        axis.title.y = element_text(size = 15), 
-        legend.key.size = unit(1, 'cm'), 
-        legend.text = element_text(size = 13), 
-        title = element_text(size = 15))
-
-boxplot2 <- ggplot(data = mydata3, aes(x = vaccine, y = Death))
-boxplot2 + geom_boxplot(fill = "white", outlier.shape = NA) + 
-  coord_cartesian(ylim=c(0, 10000)) + 
-  geom_jitter(aes(color = vaccine), size = 3) + 
-  labs(title = "Figure 4. Boxplot for total number of deaths") + 
-  theme(axis.text.x = element_text(size = 10), 
-        axis.text.y = element_text(size = 10), 
-        axis.title.x = element_text(size = 15), 
-        axis.title.y = element_text(size = 15), 
-        legend.key.size = unit(1, 'cm'), 
-        legend.text = element_text(size = 13), 
-        title = element_text(size = 15))
-
-scatter <- ggplot(data = mydata3, aes(x = Cases, y = Death, color = vaccine))
-scatter + geom_point(aes(shape = Total_cases), size = 3) + 
-  coord_cartesian(xlim=c(0, 1000000), ylim=c(0, 20000)) +
-  geom_smooth(method = lm, lwd = 2) + 
-  labs(title = "Figure 5. Scappterplot: Number of cases vs Deaths") + 
-  theme(axis.text.x = element_text(size = 10), 
-        axis.text.y = element_text(size = 10), 
-        axis.title.x = element_text(size = 15), 
-        axis.title.y = element_text(size = 15), 
-        legend.key.size = unit(1, 'cm'), 
-        legend.text = element_text(size = 13), 
-        title = element_text(size = 15))
-
-his <- ggplot(data = mydata3, aes(x = Total))
-his + geom_histogram() + 
-  coord_cartesian(xlim=c(0, 1000000)) + 
-  labs(title = "Figure 6. Histogram of Total Cases via Timelines") + 
-  theme(axis.text.x = element_text(size = 10), 
-        axis.text.y = element_text(size = 10), 
-        axis.title.x = element_text(size = 15), 
-        axis.title.y = element_text(size = 15), 
-        legend.key.size = unit(1, 'cm'), 
-        legend.text = element_text(size = 13), 
-        title = element_text(size = 15))
-
-# mydata3$Month <- ordered(mydata3$Month, levels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"))
-mydata3$Month <- factor(mydata3$Month, levels = unique(mydata3$Month))
-
-neighbor <- mydata3 %>% filter(State %in% c("North Carolina", "South Carolina", "Tennessee","Georgia", "Kentucky", "Virginia", "West Virginia"))
-lineplot1 <- ggplot(data = neighbor, aes(x = Month, y = Total, color = State))
-lineplot1 + geom_line(aes(group = State)) + geom_point() + 
-  labs(title = "Figure 7. Line plot: Total cases of NC and its neighbors") + 
-  theme(axis.text.x = element_text(size = 10), 
-        axis.text.y = element_text(size = 10), 
-        axis.title.x = element_text(size = 15), 
-        axis.title.y = element_text(size = 15), 
-        legend.key.size = unit(1, 'cm'), 
-        legend.text = element_text(size = 13), 
-        title = element_text(size = 15))
-
-lineplot1 <- ggplot(data = neighbor, aes(x = Month, y = Death, color = State))
-lineplot1 + geom_line(aes(group = State)) + geom_point() + 
-  labs(title = "Figure 8. Line plot: Total deaths of NC and its neighbors") + 
-  theme(axis.text.x = element_text(size = 10), 
-        axis.text.y = element_text(size = 10), 
-        axis.title.x = element_text(size = 15), 
-        axis.title.y = element_text(size = 15), 
-        legend.key.size = unit(1, 'cm'), 
-        legend.text = element_text(size = 13), 
-        title = element_text(size = 15))
+barplot1 <- mydata3 %>% filter(Province %in% c("California", "New York", "Florida", "Texas", "Michigan", "North Carolina")) %>% 
+  group_by(Province, vaccine) %>% 
+  summarise(Avg_active = mean(Active), SD_active = sd(Active), Median_active = median(Active), IQR_active = IQR(Active))
 ```
 
-## Welcome to GitHub Pages
+    ## `summarise()` has grouped output by 'Province'. You can override using the `.groups` argument.
 
-You can use the [editor on
-GitHub](https://github.com/peachgal/vignette_project/edit/main/README.md)
-to maintain and preview the content for your website in Markdown files.
+``` r
+barplot2 <- mydata3 %>% filter(Province %in% c("California", "New York", "Florida", "Texas", "Michigan", "North Carolina")) %>% 
+  group_by(Province, vaccine) %>% 
+  summarise(Average = mean(Deaths), SD = sd(Deaths), Median = median(Deaths), IQR = IQR(Deaths))
+```
 
-Whenever you commit to this repository, GitHub Pages will run
-[Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from
-the content in your Markdown files.
+    ## `summarise()` has grouped output by 'Province'. You can override using the `.groups` argument.
 
-### Markdown
+``` r
+g <- ggplot(data = barplot1, aes(x = Province, y = Avg_active, fill = vaccine))
+g + geom_bar(stat = "identity", position = "dodge") + 
+  labs(x = "State", y = "Average Active Cases", title = "Figure 1. Average active cases at each timeline for each state") + 
+  scale_fill_discrete(name = "Vaccine timeline") + 
+  theme(axis.text.x = element_text(angle = 45, size = 10), 
+        axis.text.y = element_text(size = 10), 
+        axis.title.x = element_text(size = 13), 
+        axis.title.y = element_text(size = 13), 
+        legend.key.size = unit(1, 'cm'), 
+        legend.text = element_text(size = 13), 
+        title = element_text(size = 13))
+```
+
+![](../images/unnamed-chunk-11-1.png)<!-- -->
+
+``` r
+d <- ggplot(data = barplot2, aes(x = Province, y = Average, fill = vaccine))
+d + geom_bar(stat = "identity", position = "dodge") + 
+  labs(x = "State", y = "Average Deaths", title = "Figure 2. Average deaths at each timeline for each state") + 
+  scale_fill_discrete(name = "Vaccine timeline") + 
+  theme(axis.text.x = element_text(angle = 45, size = 10), 
+        axis.text.y = element_text(size = 10), 
+        axis.title.x = element_text(size = 13), 
+        axis.title.y = element_text(size = 13), 
+        legend.key.size = unit(1, 'cm'), 
+        legend.text = element_text(size = 13), 
+        title = element_text(size = 13))
+```
+
+![](../images/unnamed-chunk-11-2.png)<!-- -->
+
+#### Box-Plots
+
+Figure 3 and Figure 4 show the entire US data of active cases and deaths
+at each timeline. Note that each state has four dots in “vaccinat-ing”
+period, three dots in “some vaccinated” period and two dots in “back to
+school” period. So, there will be more data points in the first period
+than the second period and the third period. In addition, I apologize
+that due to the numerous outliers in both boxplots, I had to adjust the
+y-axis scales in order to see the median for each timeline.
+
+Overall, Figure 3 shows that the median active cases is higher in the
+“back to school” period than in the “vaccinat-ing” period or “some
+vaccinated” period in US. The IQR block seems to be longer in the third
+period than it is in the first period. Again, we do not have enough
+information for the “back to school” period to confirm this. However,
+the median active cases is definitely the lowest and the IQR block is
+the smallest in the “some vaccinated” period in US compared to the other
+two timelines.
+
+Figure 4 shows the median deaths is about the same in both
+“vaccinat-ing” period and “back to school” period with “back to school”
+IQR block being a little smaller than the “vaccinat-ing” IQR block. We
+need more information in the “back to school” period to be definite
+about this.
+
+``` r
+boxplot1 <- ggplot(data = mydata3, aes(x = vaccine, y = Active))
+boxplot1 + geom_boxplot(fill = "white", outlier.shape = NA) + 
+  coord_cartesian(ylim=c(0, 200000)) + 
+  geom_jitter(aes(color = vaccine), size = 3) + 
+  labs(x = "Vaccine Timeline", y = "Active cases", title = "Figure 3. Active cases at each timeline in US") + 
+  theme(axis.text.x = element_text(size = 10), 
+        axis.text.y = element_text(size = 10), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15), 
+        legend.key.size = unit(1, 'cm'), 
+        legend.text = element_text(size = 13), 
+        title = element_text(size = 14))
+```
+
+![](../images/unnamed-chunk-12-1.png)<!-- -->
+
+``` r
+boxplot2 <- ggplot(data = mydata3, aes(x = vaccine, y = Deaths))
+boxplot2 + geom_boxplot(fill = "white", outlier.shape = NA) + 
+  coord_cartesian(ylim=c(0, 4000)) + 
+  geom_jitter(aes(color = vaccine), size = 3) + 
+  labs(x = "Vaccine Timeline", y = "Number of Deaths", title = "Figure 4. Total number of deaths at each timeline in US") + 
+  theme(axis.text.x = element_text(size = 10), 
+        axis.text.y = element_text(size = 10), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15), 
+        legend.key.size = unit(1, 'cm'), 
+        legend.text = element_text(size = 13), 
+        title = element_text(size = 14))
+```
+
+![](../images/unnamed-chunk-12-2.png)<!-- -->
+
+#### Scatterplot
+
+Figure 5 scatterplot shows the relationship between number of active
+cases and number of deaths for different timelines in US. We can already
+guess that the relationship between active cases and deaths is a strong
+positive correlation. However, will that correlation stay the same
+between them for all vaccine time groups? Apparently not! Figure 5
+indicates that in the “vaccinat-ing” period, the correlation between
+active cases and deaths is the strongest compared to the other two time
+groups. However, when the vaccine shots were taken place across US,
+approximately 40% of the population were vaccinated and together with
+the State-mandated restrictions during “some vaccinated” period, despite
+the increasing active cases, deaths were not imminent in this period.
+The active cases and number of deaths have the weakest correlation in
+the “some vaccinated” period.
+
+Furthermore, despite also increased number of active cases in the “back
+to school” period, the correlation between number of deaths and active
+cases is still not nearly as strong as they are in the “vaccinat-ing”
+period. Table 6, the correlation table, coincides with the findings
+shown in Figure 5.
+
+Once again, the plot is showing vaccines are helping the population to
+fight the virus. Despite students going back to schools, infected but
+fully vaccinated individuals may have better surviving odds against the
+virus. I apologize again that due to some large number outliters, I have
+to zoom-in on the action part to see the relationships better.
+
+``` r
+sub1 <- mydata3 %>% filter(vaccine %in% c("Vaccinat-ING"))
+sub2 <- mydata3 %>% filter(vaccine %in% c("Some vaccinated"))
+sub3 <- mydata3 %>% filter(vaccine %in% c("Back to school"))
+
+corr1 <- cor(sub1$Active, sub1$Deaths)
+corr2 <- cor(sub2$Active, sub2$Deaths)
+corr3 <- cor(sub3$Active, sub3$Deaths)
+corr_all <- cbind(corr1, corr2, corr3)
+kable(corr_all, digits = 4, col.names = c("Vaccinat-ING", "Some vaccinated", "Back to school"), 
+      caption = "Table 6, Correlations between active cases and deaths for each group")
+```
+
+| Vaccinat-ING | Some vaccinated | Back to school |
+|-------------:|----------------:|---------------:|
+|       0.8814 |          0.6761 |         0.7897 |
+
+Table 6, Correlations between active cases and deaths for each group
+
+``` r
+scatter <- ggplot(data = mydata3, aes(x = Active, y = Deaths, color = vaccine))
+scatter + geom_point(aes(shape = f500_deaths),size = 3) + 
+  scale_shape_discrete(name = "500 deaths") + 
+  coord_cartesian(xlim=c(0, 300000), ylim=c(0, 7500)) +
+  geom_smooth(method = lm, lwd = 2) + 
+  labs(x = "Active Cases", y = "Number of Deaths", title = "Figure 5. Active cases vs Deaths for each Vaccine timeline in US") + 
+  theme(axis.text.x = element_text(size = 10), 
+        axis.text.y = element_text(size = 10), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15), 
+        legend.key.size = unit(1, 'cm'), 
+        legend.text = element_text(size = 13), 
+        title = element_text(size = 13))
+```
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](../images/unnamed-chunk-13-1.png)<!-- -->
+
+``` r
+#scale_fill_discrete(name = NULL)
+```
+
+#### Histogram
+
+Figure 6 shows histograms of number of deaths in US at different
+timelines. This may not be as helpful to us as the other plots. Remember
+there is one issue we addressed in the boxplots section. That is, there
+are twice as much data points in the “vaccinat-ing” period than in the
+“back to school” period since the “vaccinat-ing” period has four months
+of data for each state while the “back to school” period only has two
+months of data. Regardless, we see a significantly low deaths count in
+the “some vaccinated” period than the other two timelines. This says
+with approximately 40% of US population being vaccinated at least one
+shot and with the most state-mandated regulations on Covid-19
+restrictions in the “some-vaccinated” period, we had a low deaths count
+in the same period.
+
+``` r
+his <- ggplot(data = mydata3, aes(x = Deaths, color = vaccine, fill = vaccine))
+his + geom_histogram() + 
+  coord_cartesian(xlim=c(0, 5000)) + 
+  labs(title = "Figure 6. Number of deaths in US for each vaccine timeline") + 
+  theme(axis.text.x = element_text(angle= 45, size = 10), 
+        axis.text.y = element_text(size = 10), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15), 
+        legend.key.size = unit(1, 'cm'), 
+        legend.text = element_text(size = 13), 
+        title = element_text(size = 13)) + 
+  facet_wrap(~vaccine) 
+```
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+![](../images/unnamed-chunk-14-1.png)<!-- -->
+
+#### Line Plots
+
+Figure 7 shows the total number of active cases each month in North
+Carolina and its neighbors since January 2021. The plot indicates the
+numbers were decreasing each month since January for every state and
+finally reached the minimum number of active cases so far for every
+state in June 2021. Then, the numbers were slowly going back up but then
+elevated when students went back to classroom and most states relaxed on
+their Covid-19 restrictions such as mask mandate and social distancing.
+This is reflected in the numerical summary shown in Table 4.
+
+Figure 8 shows the total number of deaths each month in North Carolina
+and its neighbors since January 2021. This plot displays similar pattern
+as shown in Figure 7. Relatively speaking, North Carolina and some of
+its neighbors have less deaths in the later months than in the earlier
+months of 2021. Antibodies from the vaccine are helping the infected but
+vaccinated individuals to fight the virus. This is also reflected in the
+numerical summary shown in Table 5.
+
+These plots tell us that despite the high-volume vaccine administration
+during the earlier months in 2021, State-mandated regulations on
+Covid-19 restrictions also helped greatly drive the number of cases and
+deaths down. Thus, we should continue to do so to help stop the
+community spread of the virus and get vaccine shots if people have not
+already.
+
+``` r
+mydata3$Month <- factor(mydata3$Month, levels = unique(mydata3$Month))
+neighbor <- mydata3 %>% filter(State %in% c("North Carolina", "South Carolina", "Tennessee","Georgia", "Kentucky", "Virginia"))
+
+lineplot1 <- ggplot(data = neighbor, aes(x = Month, y = Active, color = State))
+lineplot1 + geom_line(aes(group = State), lwd = 2) + geom_point() + 
+  labs(y = "Active Cases", title = "Figure 7. Active cases each month in NC and its neighbors") + 
+  theme(axis.text.x = element_text(size = 10), 
+        axis.text.y = element_text(size = 10), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15), 
+        legend.key.size = unit(1, 'cm'), 
+        legend.text = element_text(size = 13), 
+        title = element_text(size = 13))
+```
+
+![](../images/unnamed-chunk-15-1.png)<!-- -->
+
+``` r
+lineplot1 <- ggplot(data = neighbor, aes(x = Month, y = Deaths, color = State))
+lineplot1 + geom_line(aes(group = State), lwd = 2) + geom_point() + 
+  labs(y = "Total Deaths", title = "Figure 8. Number of deaths each month in NC and its neighbors") + 
+  theme(axis.text.x = element_text(size = 10), 
+        axis.text.y = element_text(size = 10), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15), 
+        legend.key.size = unit(1, 'cm'), 
+        legend.text = element_text(size = 13), 
+        title = element_text(size = 13))
+```
+
+![](../images/unnamed-chunk-15-2.png)<!-- -->
+
+### Conclusion
 
 Markdown is a lightweight and easy-to-use syntax for styling your
 writing. It includes conventions for
