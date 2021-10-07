@@ -26,6 +26,7 @@ rmarkdown::render("C:/Users/peach/Documents/ST558/ST558_repos/vignette_project/_
 
 Below is a list of packages needed to create the vignette:  
   
+* `knitr`  
 * `httr`  
 * `jsonlite`  
 * `countrycode`  
@@ -33,6 +34,7 @@ Below is a list of packages needed to create the vignette:
 * `ggplot2`  
 
 ```{r eval=TRUE, echo=TRUE, warning=FALSE, message=FALSE}
+library(knitr)
 library(httr)
 library(jsonlite)
 library(tidyverse)
@@ -580,15 +582,18 @@ test_data
 
 ### Getting Data
 
-Since the free Covid-19 data query does not require a key and has limited access/queries. For instance, each time we make a request to query, we can only query data for a range up to a week. Thus, I made a single-day query for the last day of each month from December 2020 to September 2021 since the data is accumulated. I only selected five columns (*Province*, *Confirmed*, *Deaths*, *Active*, *Date*) from each query and saved them to an object named by a month of that query. I row-combined those objects/queries into two different data sets since they all have the same column names. This way I did so that I can column-combine them later and subtract the same case type for each state for each month. The example I had in mind is shown in the table below.
-  
-* Confirmed = Confirmed_cases - Confirmed_cases2  
+Since the free Covid-19 data query does not require a key and has limited access/queries. For instance, each time we make a request to query, we can only query data for a range up to a week. Thus, I made a single-day query for the last day of each month from December 2020 to September 2021 since the data is accumulated. I only selected five columns (*Province*, *Confirmed*, *Deaths*, *Active*, *Date*) from each query and saved them to an object named by a month of that query. I row-combined those objects/queries into two different data sets since they all have the same column names. This way I did so that I can column-combine them later and subtract the same case type for each state for each month. 
 
-Province       | Confirmed_cases | Confirmed_cases2 | Month
--------------- | --------------- | ---------------- | ---------
-North Carolina | 4569 (Jan 2021) | 4123 (Dec 2020)  | January
-North Carolina | 5638 (Feb 2021) | 4569 (Jan 2021)  | February
-North Carolina | ...             | 5638 (Feb 2021)  | March
+The data set I had in mind eventually should look like the example table shown below so that I can compute the following tasks.
+  
+* Total confirmed cases/month, state = Confirmed_cases - Confirmed_cases2  
+* Total number of deaths/month, state = Deaths_1 - Deaths_2
+
+Province         | Confirmed_cases   | Confirmed_cases2   | Deaths_1        | Deaths_2         | Month
+---------------- | ----------------- | ------------------ | ----------------| ---------------- | ----------
+North Carolina   | 4569 (Jan 2021)   | 4123 (Dec 2020)    | 568 (Jan 2021)  | 538 (Dec 2020)   | January
+North Carolina   | 5638 (Feb 2021)   | 4569 (Jan 2021)    | 588 (Feb 2021)  | 568 (Jan 2021)   | February
+North Carolina   | 5883 (Mar 2021)   | 5638 (Feb 2021)    | 638 (Mar 2021)  | 588 (Feb 2021)   | March
 
 ```{r eval=TRUE, cache=FALSE}
 dec <- get_data(5, "usa", date_from="2020 12 31", date_to="2020 12 31", time_to="23:59:59")
@@ -627,6 +632,7 @@ before_date <- early_date %>% group_by(Province, Date) %>% summarise(across(c(Co
 
 names(before_date) <- c("State", "Date2", "Confirmed2", "Deaths2", "Active2")
 mydata1 <- cbind(after_date, before_date)
+mydata1 <- mydata1[-1:-9, ]
 mydata1
 ```
 
@@ -664,59 +670,73 @@ I used `mutate` function to create three categorical variables using the numeric
     + More than 500 deaths  
     
 * *Total_cases* (3 levels):  
-    + Less than 9000  
-    + Between 9000 and 30,000  
-    + More than 30,000  
+    + Less than 9,000 cases  
+    + Between 9,000 and 30,000 cases  
+    + More than 30,000 cases  
     
 * *vaccine* (3 levels):  
-    + Vaccine-ing  
-    + Some vaccined  
-    + Back to school  
+    + Vaccine-ING (Jan, Feb, Mar, Apr)  
+    + Some vaccined (May, Jun, Jul)  
+    + Back to school (Aug, Sep)  
     
 ```{r eval=TRUE, cache=TRUE}
 `%!in%` <- Negate(`%in%`)
 
-mydata3 <- mydata2 %>% filter(Province %!in% c("American Samoa", "Diamond Princess", "Grand Princess", "Guam", "Northern Mariana Islands", "Puerto Rico", "Virgin Islands")) %>% 
-  mutate(f500_deaths = if_else(Deaths < 500, "Less than 500 deaths", "More than 500 deaths"), 
-         Total_cases = if_else(Total < 9000, "1. Less than 9000", 
-                             if_else(Total < 30000, "2. Between 9000 and 30,000", "3. More than 30,000")), 
-         vaccine = if_else(Month %in% c("Jan", "Feb", "Mar", "Apr"), "Vaccine-ing", 
-                           if_else(Month %in% c("May", "Jun", "Jul"), "Some vaccined", "Back to school")))
+mydata3 <- mydata2 %>% filter(Province %!in% c("American Samoa", "Diamond Princess", "Grand Princess", "Guam", "Northern Mariana Islands", "Puerto Rico", "Virgin Islands", " ")) %>% 
+  mutate(f500_deaths = if_else(Deaths < 500, 1, 2), 
+         Total_cases = if_else(Total < 9000, 1, 
+                             if_else(Total < 30000, 2, 3)), 
+         vaccine = if_else(Month %in% c("Jan", "Feb", "Mar", "Apr"), 1, 
+                           if_else(Month %in% c("May", "Jun", "Jul"), 2, 3)))
+
+mydata3$f500_deaths <- cut(mydata3$f500_deaths, 2, c("Less than 500 deaths", "More than 500 deaths"))
+mydata3$Total_cases <- cut(mydata3$Total_cases, 3, c("Less than 9,000 cases", "Between 9,000 and 30,000 cases", "More than 30,000 cases"))
+mydata3$vaccine <- cut(mydata3$vaccine, 3, c("Vaccine-ING", "Some vaccined", "Back to school"))
 ```
 
 ## Contingency Tables
 
+Now we have 51 states, and each state has nine months worth of data. Therefore, 51 x 9 = 459 rows in the data. Each event in Table 1 represents one state and one month. However, since "Vaccine-ing" period has 4 months, "Some vaccined" period contains 3 months and "Back to school" period only has 2 months, the data is not on a even scale for the three categories. Hence, we cannot compare them across columns. We can only compare them down the rows within each column. 
 
+During the "Vaccine-ING" period (Jan-Apr), most of the states appeared with more than 30,000 cases per month. However, that number dropped during "Some vaccined" period (May-Jul). A lot of the events (month&state) were having less than 9,000 cases. This incident should tell us that the Covid-19 vaccines were working its magic during this time. Unfortunately, the number of events went back up to having more than 30,000 cases during "Back to school" period when students were going back to classrooms, in-person delivery teaching method. 
 
+Table 2 and Table 3 show the total confirmed cases and total number of deaths between the states known to have the most cases from January to September 2021 compared to North Carolina. One interesting finding is that the number of total confirmed cases were slowly dropping for each state during "Vaccine-ing" period and then reached the minimum number of cases of all time during "some vaccined" period. However, that number went back up when students went back to schools. The number total confirmed cases were almost equivalent to those numbers back in January for most states. This is why state of North Carolina reinforced the mask mandate again in August 2021. 
 
+Since there are more cases in each state, there will be more deaths. If the number of cases are less, the number of deaths will be less in each state as well. It is difficult to see this in a table. Let's visualize these data with different plots in the plots section.
 
 ```{r eval=TRUE}
 # 1st contingency table
-table(mydata3$Total_cases, mydata3$vaccine)
+table(mydata3$Total_cases, mydata3$vaccine) %>% kable(caption = "Table 1. Total Confirmed Cases vs. Vaccine Timeline")
 
 # 2nd contingency table
 mydata3 %>% filter(Province %in% c("California", "New York", "Florida", "Texas", "Michigan", "North Carolina")) %>% 
   select(Province, Month, Deaths) %>%
-  pivot_wider(names_from = "Month", values_from = "Deaths") %>% arrange(desc(Jan))
+  pivot_wider(names_from = "Month", values_from = "Deaths") %>% arrange(desc(Jan)) %>% 
+  kable(caption = "Table 2. Number of Deaths for Each Month across Different States")
+
 # 3rd contingency table
 mydata3 %>% filter(Province %in% c("California", "New York", "Florida", "Texas", "Michigan", "North Carolina")) %>% 
   select(Province, Month, Total) %>%
-  pivot_wider(names_from = "Month", values_from = "Total") %>% arrange(desc(Jan))
+  pivot_wider(names_from = "Month", values_from = "Total") %>% arrange(desc(Jan)) %>% 
+  kable(caption = "Table 3. Total Confirmed Cases for Each Month across Different States")
 ```
 
 ## Numerical Summaries
 
+Table 4 and Table 5 shows the numerical summaries of active cases and deaths during each vaccine timeline for North Carolina and its neighbors. North Carolina was placed pretty high regarding to the active cases for each timeline right below Georgia, followed by Tennessee. Shockingly, the average active cases for "back to school" period all exceeded the average active cases for "vaccine-ing" period for every state with Virginia being a close-call. The number was almost doubled for some states or more than doubled for Tennessee. This indicates that "back to school" event drove the number of cases up in each state and counterattacked the great effect brought by wide-spread vaccine administration. The effect of vaccine is shown in the "some vaccined" period that drove the average active cases down.
 
+However, the effect of "going back to school" event is not as dramatic as shown in Table 4 as in Table 5. The number of deaths did go up during "back to school" period due to elevated number of active cases in the same period, however, that number was not almost doubled or doubled. They were only matching or even. This could be the vaccines were developing antibodies and immunity in our body, and hence, the infected individuals had a better chance to fight the virus and survived during "back to school" period. People should really get their vaccine shots if they have not already. 
 
+```{r eval=TRUE, message=FALSE}
+mydata3 %>% filter(Province %in% c("North Carolina", "South Carolina", "Tennessee","Georgia", "Virginia")) %>% 
+  group_by(Province, vaccine) %>% 
+  summarise(Avg_active = mean(Active), SD_active = sd(Active), Median_active = median(Active), IQR_active = IQR(Active)) %>% 
+  kable(digit = 2, caption = "Table 4. Active cases per vaccine timeline for North Carolina and its neighbors.")
 
-```{r eval=TRUE}
-# summaries
-summary3 <- mydata3 %>% group_by(Province, vaccine) %>% 
-  summarise(avg_total = round(mean(Total)), sd_total = round(sd(Total)), median_total = round(median(Total)), IQR_total = round(IQR(Total)))
-
-summary4 <- mydata3 %>% group_by(Province, vaccine) %>% 
-  summarise(avg_death = mean(Deaths), sd_death = sd(Deaths), median_death = median(Deaths), IQR_death = IQR(Deaths))
-
+mydata3 %>% filter(Province %in% c("North Carolina", "South Carolina", "Tennessee","Georgia", "Virginia")) %>% 
+  group_by(Province, vaccine) %>% 
+  summarise(Average = mean(Deaths), SD = sd(Deaths), Median = median(Deaths), IQR = IQR(Deaths)) %>% 
+  kable(digit = 2, caption = "Table 5. Number of deaths per vaccine timeline for North Carolina and its neighbors.")
 ```
 
 ## Explanatory Data Analysis

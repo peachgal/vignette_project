@@ -1,10 +1,24 @@
 ST558 - Vignette Project - Covid-19 Data
 ================
 Jasmine Wang
-10/05/2021
+10/07/2021
 
+-   [Required Packages](#required-packages)
 -   [Writing Functions](#writing-functions)
 -   [Getting an API](#getting-an-api)
+    -   [Getting Data](#getting-data)
+    -   [Data Manipulation](#data-manipulation)
+    -   [Creating Variables](#creating-variables)
+    -   [Creating an Infix Function and Categorical
+        Variables](#creating-an-infix-function-and-categorical-variables)
+-   [Contingency Tables](#contingency-tables)
+-   [Numerical Summaries](#numerical-summaries)
+-   [Explanatory Data Analysis](#explanatory-data-analysis)
+    -   [Barplots](#barplots)
+    -   [Boxplots](#boxplots)
+    -   [Scatterplot](#scatterplot)
+    -   [Histogram](#histogram)
+    -   [Line Plots](#line-plots)
 -   [Welcome to GitHub Pages](#welcome-to-github-pages)
     -   [Markdown](#markdown)
     -   [Jekyll Themes](#jekyll-themes)
@@ -23,23 +37,25 @@ rmarkdown::render("C:/Users/peach/Documents/ST558/ST558_repos/vignette_project/_
 )
 ```
 
-## Writing Functions
+## Required Packages
+
+Below is a list of packages needed to create the vignette:
+
+-   `knitr`  
+-   `httr`  
+-   `jsonlite`  
+-   `countrycode`  
+-   `tidyverse`  
+-   `ggplot2`
 
 ``` r
+library(knitr)
 library(httr)
 library(jsonlite)
 library(tidyverse)
 library(countrycode)
 
-#general_input
-#country
-#status_input
-#date_from_input
-#date_to_input
-#time_from_input
-#time_to_input
-
-######## General summary/countries/all################################################
+######## General summary/countries/all####################################################
 general_input <- function(gen_input, ...){
   
   input1 <- tolower(gen_input, ...) 
@@ -57,7 +73,7 @@ general_input <- function(gen_input, ...){
   }
 }
 
-####### country ###############################################################
+####### Country ###########################################################################
 country <- function(country_name, ...){
   
   if(nchar(country_name) == 3) {
@@ -81,12 +97,10 @@ country <- function(country_name, ...){
     nation_name
   }
 }
-
 #countrycode('Albania', origin = 'country.name', destination = 'iso3c')
-#nation <- "usa"
 #countrycode(nation, origin = "iso3c", destination = "country.name")
 
-####### status ##################################################################
+####### Status ### confirmed/recovered/deaths #####################################
 status_input <- function(status, ...){
   
   input <- tolower(status, ...)
@@ -104,7 +118,7 @@ status_input <- function(status, ...){
   }
 }
 
-####### date #########################################################################
+####### Date Function ####################################################################
 date_input_from <- function(date_from, ...){
   
   y <- c(date_from)
@@ -203,7 +217,7 @@ date_input_to <- function(date_to, ...){
   }
 }
 
-######### Time function #############################################################
+######### Time Function ##################################################################
 time_input_from <- function(time_from, ...){
   
   times <- c(time_from)
@@ -339,7 +353,6 @@ ref_general <- function(gen_input = "countries", ...){
   
 }
 
-#dayone all status
 dayone_all_status <- function(country_name = "BB", ...){
   
   info2 <- country(country_name, ...)
@@ -349,7 +362,6 @@ dayone_all_status <- function(country_name = "BB", ...){
   
 }
 
-#dayone with STATUS
 dayone_status <- function(country_name = "BB", status = "confirmed", ...){
   
   info2 <- country(country_name, ...)
@@ -370,7 +382,6 @@ dayone_status_live <- function(country_name = "BB", status = "confirmed", ...){
   
 }
 
-#by country ALL status from date time to date time 
 datetime_specific_all_status <- function(country_name="BB", date_from="2020-05-01", date_to="2020-05-03", 
                                              time_from="00:00:00", time_to="00:00:00", ...){
   
@@ -387,7 +398,6 @@ datetime_specific_all_status <- function(country_name="BB", date_from="2020-05-0
   
 }
 
-#by country with STATUS from date time to date time
 datetime_specific_status <- function(country_name="BB", status="confirmed", date_from="2020-05-01", date_to="2020-05-03", 
                                          time_from="00:00:00", time_to="00:00:00", ...){
   
@@ -438,7 +448,106 @@ live_status_after_date <- function(country_name = "BB", status = "confirmed",
   api_url
   
 }
+```
 
+## Writing Functions
+
+I wrote some mini-functions so that the input arguments are
+user-friendly to query the Covid-19 data from [Covid-19
+API](https://covid19api.com/). I created a wrapper function,
+`choose_api`, which contains nine customized functions to obtain the
+correct API URL to query the data needed for the users. Users only need
+to supply with arguments like the country they want to query from,
+status of the query (total confirmed cases, recovered cases, or number
+of deaths), and starting at certain date and time they want to query the
+data. Users can use `choose_api` function to check if their query API
+URL is correct to query the data they need. Then, they can use the exact
+same arguments they used in the `choose_api` function in the `get_data`
+function to obtain the parsed data in a usable form. Thus, if the API
+URL obtained from `choose_api` function is not correct, those same
+arguments are surely not going to work in the `get_data` function.
+Therefore, `choose_api` function is a way to see if the user-supplied
+arguments are correct, and the obtained API URL is what the users want
+to query.
+
+Let’s look at the options of the data the customized functions can
+query:
+
+1.  **general** option, `ref_general` function:
+    -   *summary* returns a summary of new and total cases per country,
+        updated daily.  
+    -   *countries* returns all the available countries and provinces,
+        and the country slug for per country requests.  
+    -   *all* returns all daily data. WARNING: This call results in &gt;
+        10MB of data being returned and should be used infrequently.  
+    -   `choose_api(type = 1, gen_input = "summary")`
+    -   <https://api.covid19api.com/summary>
+2.  **option1** API, `dayone_all_status`:
+    -   Returns all cases types including confirmed cases, recovered
+        cases and deaths for a country from the first recorded case.
+    -   `choose_api(type = 2, country_name = "barbados")`  
+    -   <https://api.covid19api.com/dayone/country/barbados>
+3.  **option2** API, `dayone_status`:
+    -   Returns cases by case type for a country from the first recorded
+        case. Case types must be one of confirmed, recovered or
+        deaths.  
+    -   `choose_api(type = "option2", country_name = "barbados", status = "confirmed")`
+    -   <https://api.covid19api.com/dayone/country/barbados/status/confirmed>
+4.  **option3** API, `dayone_status_live`:
+    -   Returns cases by case type for a country from the first recorded
+        case with the latest record being the live count. Case types
+        must be one of confirmed, recovered or deaths.  
+    -   `choose_api(type = "option3", country_name = "barbados", status = "confirmed")`  
+    -   <https://api.covid19api.com/dayone/country/barbados/status/confirmed/live>
+5.  **option4** API, `datetime_specific_all_status`:
+    -   Returns all cases types including confirmed cases, recovered
+        cases and deaths for a country. Date and time can vary and be
+        chosen by users.  
+    -   `choose_api(type = 5, country_name = "barbados", date_from = "2020-05-01", date_to = "2020-05-03", time_from = "00:00:00", time_to = "00:00:00")`
+    -   <https://api.covid19api.com/country/barbados?from=2020-05-01T00:00:00Z&to=2020-05-03T00:00:00Z>
+6.  **option5** API, `datetime_specific_status`:
+    -   Returns cases by case type for a country. Date and time can vary
+        and be chosen by users. Case types must be one of confirmed,
+        recovered or deaths.  
+    -   `choose_api(type = "option5", country_name = "barbados", status = "confirmed", date_from = "2020-05-01", date_to = "2020-05-03", time_from = "00:00:00", time_to = "00:00:00")`
+    -   <https://api.covid19api.com/country/barbados/status/confirmed?from=2020-05-01T00:00:00Z&to=2020-05-03T00:00:00Z>
+7.  **option6** API, `live_all_status`:
+    -   Returns all live cases types including confirmed cases,
+        recovered cases and deaths for a country. These records are
+        pulled every 10 minutes and are ungrouped.  
+    -   `choose_api(type = 7, country_name = "barbados")`  
+    -   <https://api.covid19api.com/live/country/barbados>
+8.  **option7** API, `live_status`:
+    -   Returns live cases by case type for a country. These records are
+        pulled every 10 minutes and are ungrouped. Case types must be
+        one of confirmed, recovered or deaths.  
+    -   `choose_api(type = 8, country_name = "barbados", status = "confirmed")`
+    -   <https://api.covid19api.com/live/country/barbados/status/confirmed>
+9.  **option8** API, `live_status_after_date`:
+    -   Returns live cases by case type for a country after a given
+        date/time. These records are pulled every 10 minutes and are
+        ungrouped. Case types must be one of confirmed, recovered or
+        deaths.  
+    -   `choose_api(type = "option8", country_name = "barbados", status = "confirmed", date_from = "2020-05-01", time_from = "00:00:00")`  
+    -   <https://api.covid19api.com/live/country/barbados/status/confirmed/date/2020-05-01T00:00:00Z>
+
+Simply use `choose_api(type, ...)` to get the desired API URL. Use
+argument, `type = 1` or `type = "general"`, to select the customized API
+function call for a summary or a list of available countries or all
+data. Use `type = 2` or `type = "option1"` to obtain the API URL for all
+cases types for a country since the first recorded case.
+
+If more argument inputs are needed, subsequent order of the arguments
+is:
+
+-   “type” -&gt; “country” -&gt; “status” -&gt; “date from” -&gt; “date
+    to” -&gt; “time from” -&gt; “time to”
+
+If the desired API URL the users get from the `choose_api` function is
+correct, the same exact arguments used in `choose_api` will be used
+again in `get_data` function to query the data from Covid-19 API site.
+
+``` r
 choose_api <- function(type, ...) {
   
   switch(type,
@@ -455,8 +564,6 @@ choose_api <- function(type, ...) {
   )
 }
 
-choose_api(9)
-
 get_data <- function(type, ...){
   
   api_url <- choose_api(type, ...)
@@ -466,167 +573,466 @@ get_data <- function(type, ...){
   usable_form
   
 }
-
-get_data(3)
-
-
-choose_api(5, "usa", date_to="5 6 2021", time_to="5:4:23")
 ```
 
-| Function(s)                     | Argument(s)                                                       | Default(s)                |
-|---------------------------------|-------------------------------------------------------------------|---------------------------|
-| ref\_general                    | gen\_input                                                        | None                      |
-| —————————-                      | ————————————————————                                              | ————————-                 |
-| dayone\_all\_status             | country\_name                                                     | country\_name = “BB”      |
-| —————————-                      | ————————————————————                                              |                           |
-| dayone\_status                  | country\_name, status                                             | status = “confirmed”      |
-| —————————-                      | ————————————————————                                              |                           |
-| dayone\_status\_live            | country\_name, status                                             | date\_from = “2020-05-01” |
-| —————————-                      | ————————————————————                                              |                           |
-| datetime\_specific\_all\_status | country\_name, date\_from, date\_to, time\_from, time\_to         | date\_to = “2020-05-03”   |
-| —————————-                      | ————————————————————                                              |                           |
-| datetime\_specific\_status      | country\_name, status, date\_from, date\_to, time\_from, time\_to | time\_from = “00:00:00”   |
-| —————————-                      | ————————————————————                                              |                           |
-| live\_all\_status               | country\_name                                                     | time\_to = “00:00:00”     |
-| —————————-                      | ————————————————————                                              |                           |
-| live\_status                    | country\_name, status                                             |                           |
-| —————————-                      | ————————————————————                                              |                           |
-| live\_status\_after\_date       | country\_name, status, date\_from, time\_from                     |                           |
+The table below show a list of customized API functions with their
+corresponding arguments and defaults set.
 
-general = ref\_general(…), option1 = dayone\_all\_status(…), option2 =
-dayone\_status(…), option3 = dayone\_status\_live(…), option4 =
-datetime\_specific\_all\_status(…), option5 =
-datetime\_specific\_status(…), option6 = live\_all\_status(…), option7 =
-live\_status(…), option8 = live\_status\_after\_date(…)
+| Function(s)                    | Argument(s)                                                              | Default(s)                 |
+|--------------------------------|--------------------------------------------------------------------------|----------------------------|
+| `ref_general`                  | `gen_input`                                                              | None for `gen_input`       |
+| `dayone_all_status`            | `country_name`                                                           | `country_name = "BB"`      |
+| `dayone_status`                | `country_name`, `status`                                                 | `status = "confirmed"`     |
+| `dayone_status_live`           | `country_name`, `status`                                                 | `date_from = "2020-05-01"` |
+| `datetime_specific_all_status` | `country_name`, `date_from`, `date_to`, `time_from`, `time_to`           | `date_to = "2020-05-03"`   |
+| `datetime_specific_status`     | `country_name`, `status`, `date_from`, `date_to`, `time_from`, `time_to` | `time_from = "00:00:00"`   |
+| `live_all_status`              | `country_name`                                                           | `time_to = "00:00:00"`     |
+| `live_status`                  | `country_name`, `status`                                                 |                            |
+| `live_status_after_date`       | `country_name`, `status`, `date_from`, `time_from`                       |                            |
+
+Let’s look at the options each argument can take:
+
+1.  `gen_input`:
+    -   Can take or partially match these options, `"summary"`,
+        `"countries"`, `"all"` (or “Su”, “SuM”, “sUmMa”). Non-case
+        sensitive.  
+    -   I did not set a default value for `gen_input` function because
+        using the API URL generated by this function will query a large
+        data set and will be time-consuming. Therefore, unless the users
+        really want to query from these options, I do not want them to
+        accidentally set it off. In a word, if the users really want to
+        query from these options, they can input those arguments
+        themselves. Otherwise, I would recommend to go to the [Covid-19
+        API
+        site](https://documenter.getpostman.com/view/10808728/SzS8rjbc#00030720-fae3-4c72-8aea-ad01ba17adf8)
+        to see the example lists from these options.
+2.  `country_name`:
+    -   Must be the slug country name from the available list or
+        2-letter (ISO2) or 3-letter (ISO3) abbreviations.  
+    -   For example, “uNitED-sTATes”, “UnItEd StAtES”, “uSa” and “uS”
+        are all valid inputs. Non-case sensitive.  
+    -   Default country is Barbados.
+3.  `status`:
+    -   Can take or partially match these options, `"confirmed"`,
+        `"recovered"`, `"deaths"` (or “Co”, “cOn”, “cOnf”). Non-case
+        sensitive.  
+    -   Default status is “confirmed”.
+4.  `date_from` and `date_to`:
+    -   Can take “2020 12 31”, “12/31/2021”, “2020-12-31”, “3 20 2021”,
+        “2020 10 6”.  
+    -   Note: If users request data from dates that are before Covid-19
+        time for a country, i.e. 2018, this may result in an error or
+        the data contains all zero lists.  
+    -   Default for `date_from` is “2020-05-01” and for `date_to` is
+        “2020-05-03”.
+5.  `time_from` and `time_to`:
+    -   *Hour* can take any numeric values from 0 to 23 (must be in
+        military time).  
+    -   *Minute* can take any numeric values from 0 to 59.  
+    -   *second* can take any numeric values from 0 to 59.  
+    -   Can take “1:4:5”, “1/4/5”, “1-4-5” (all equivalent to
+        “01:04:05”).  
+    -   Default for both `time_from` and `time_to` is "00:00:00:
+
+Note: If users do not supply any argument inputs but simply choose an
+option function to guery the data, it will return cases results for
+Barbados from May 1st, 2020, at time 00:00:00 to May 3rd, 2020, at time
+00:00:00.
+
+Note2: Free API query does not require a key for this Covid-19 API site.
+However,!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ## Getting an API
 
+Below is the API URL I used in the `get_data` function I created to
+query the data for all cases type for the United States from January
+3rd, 2021 to January 5th, 2021 (3 days). We can see it returns for
+10,000 rows and 13 columns including every city from every state in the
+United States for 3 days worth of all cases type of data. I realized by
+looking at this example data that all cases types are accumulated up
+untill the date/time queried. If I want to calculate all cases types for
+each month for each state in the United States, I can query one day of
+data at the end of each month, group by each state and sum up all
+different cases type, subtrack them from the previous end of month one
+day data. Then, we will have the number of all cases types per state per
+month, not cumulatively. Let’s see if this works!
+
 ``` r
-library(httr)
-library(jsonlite)
-library(tidyverse)
-library(countrycode)
-
-dec_1 <- get_data(5, "usa", date_from="2020 12 31", date_to="2020 12 31", time_to="23:59:59")
-jan_1 <- get_data(5, "usa", date_from="2021 1 31", date_to="2021 1 31", time_to="23:59:59")
-feb_1 <- get_data(5, "usa", date_from="2021 2 28", date_to="2021 2 28", time_to="23:59:59")
-mar_1 <- get_data(5, "usa", date_from="2021 3 31", date_to="2021 3 31", time_to="23:59:59")
-apr_1 <- get_data(5, "usa", date_from="2021 4 30", date_to="2021 4 30", time_to="23:59:59")
-may_1 <- get_data(5, "usa", date_from="2021 5 31", date_to="2021 5 31", time_to="23:59:59")
-jun_1 <- get_data(5, "usa", date_from="2021 6 30", date_to="2021 6 30", time_to="23:59:59")
-jul_1 <- get_data(5, "usa", date_from="2021 7 31", date_to="2021 7 31", time_to="23:59:59")
-aug_1 <- get_data(5, "usa", date_from="2021 8 31", date_to="2021 8 31", time_to="23:59:59")
-sep_1 <- get_data(5, "usa", date_from="2021 9 30", date_to="2021 9 30", time_to="23:59:59")
-
-dec_4 <- dec_1 %>% select(Province, Confirmed, Deaths, Active, Date) 
-jan_4 <- jan_1 %>% select(Province, Confirmed, Deaths, Active, Date)
-feb_4 <- feb_1 %>% select(Province, Confirmed, Deaths, Active, Date)
-mar_4 <- mar_1 %>% select(Province, Confirmed, Deaths, Active, Date)
-apr_4 <- apr_1 %>% select(Province, Confirmed, Deaths, Active, Date)
-may_4 <- may_1 %>% select(Province, Confirmed, Deaths, Active, Date)
-jun_4 <- jun_1 %>% select(Province, Confirmed, Deaths, Active, Date)
-jul_4 <- jul_1 %>% select(Province, Confirmed, Deaths, Active, Date)
-aug_4 <- aug_1 %>% select(Province, Confirmed, Deaths, Active, Date)
-sep_4 <- sep_1 %>% select(Province, Confirmed, Deaths, Active, Date)
+choose_api(5, "usa", date_from="2021 1 3", date_to="2021 1 5", time_to="23:59:59")
+test_data <- get_data(5, "usa", date_from="2021 1 3", date_to="2021 1 5", time_to="23:59:59")
+test_data <- test_data %>% group_by(City)
+test_data
 ```
 
+### Getting Data
+
+Since the free Covid-19 data query does not require a key and has
+limited access/queries. For instance, each time we make a request to
+query, we can only query data for a range up to a week. Thus, I made a
+single-day query for the last day of each month from December 2020 to
+September 2021 since the data is accumulated. I only selected five
+columns (*Province*, *Confirmed*, *Deaths*, *Active*, *Date*) from each
+query and saved them to an object named by a month of that query. I
+row-combined those objects/queries into two different data sets since
+they all have the same column names. This way I did so that I can
+column-combine them later and subtract the same case type for each state
+for each month.
+
+The data set I had in mind eventually should look like the example table
+shown below so that I can compute the following tasks.
+
+-   Total confirmed cases/month, state = Confirmed\_cases -
+    Confirmed\_cases2  
+-   Total number of deaths/month, state = Deaths\_1 - Deaths\_2
+
+| Province       | Confirmed\_cases | Confirmed\_cases2 | Deaths\_1      | Deaths\_2      | Month    |
+|----------------|------------------|-------------------|----------------|----------------|----------|
+| North Carolina | 4569 (Jan 2021)  | 4123 (Dec 2020)   | 568 (Jan 2021) | 538 (Dec 2020) | January  |
+| North Carolina | 5638 (Feb 2021)  | 4569 (Jan 2021)   | 588 (Feb 2021) | 568 (Jan 2021) | February |
+| North Carolina | 5883 (Mar 2021)  | 5638 (Feb 2021)   | 638 (Mar 2021) | 588 (Feb 2021) | March    |
+
 ``` r
-library(httr)
-library(jsonlite)
-library(tidyverse)
-library(dplyr)
+dec <- get_data(5, "usa", date_from="2020 12 31", date_to="2020 12 31", time_to="23:59:59")
+jan <- get_data(5, "usa", date_from="2021 1 31", date_to="2021 1 31", time_to="23:59:59")
+feb <- get_data(5, "usa", date_from="2021 2 28", date_to="2021 2 28", time_to="23:59:59")
+mar <- get_data(5, "usa", date_from="2021 3 31", date_to="2021 3 31", time_to="23:59:59")
+apr <- get_data(5, "usa", date_from="2021 4 30", date_to="2021 4 30", time_to="23:59:59")
+may <- get_data(5, "usa", date_from="2021 5 31", date_to="2021 5 31", time_to="23:59:59")
+jun <- get_data(5, "usa", date_from="2021 6 30", date_to="2021 6 30", time_to="23:59:59")
+jul <- get_data(5, "usa", date_from="2021 7 31", date_to="2021 7 31", time_to="23:59:59")
+aug <- get_data(5, "usa", date_from="2021 8 31", date_to="2021 8 31", time_to="23:59:59")
+sep <- get_data(5, "usa", date_from="2021 9 30", date_to="2021 9 30", time_to="23:59:59")
 
-# url <- "https://api.covid19api.com/country/united-states?from=2020-03-01T00:00:00Z&to=2020-04-01T00:00:00Z"
-dec_1 <- GET("https://api.covid19api.com/country/united-states?from=2020-12-31T00:00:00Z&to=2020-12-31T23:59:59Z")
-jan_1 <- GET("https://api.covid19api.com/country/united-states?from=2021-01-31T00:00:00Z&to=2021-01-31T23:59:59Z")
-feb_1 <- GET("https://api.covid19api.com/country/united-states?from=2021-02-28T00:00:00Z&to=2021-02-28T23:59:59Z")
-mar_1 <- GET("https://api.covid19api.com/country/united-states?from=2021-03-31T00:00:00Z&to=2021-03-31T23:59:59Z")
-apr_1 <- GET("https://api.covid19api.com/country/united-states?from=2021-04-30T00:00:00Z&to=2021-04-30T23:59:59Z")
-may_1 <- GET("https://api.covid19api.com/country/united-states?from=2021-05-31T00:00:00Z&to=2021-05-31T23:59:59Z")
-jun_1 <- GET("https://api.covid19api.com/country/united-states?from=2021-06-30T00:00:00Z&to=2021-06-30T23:59:59Z")
-jul_1 <- GET("https://api.covid19api.com/country/united-states?from=2021-07-31T00:00:00Z&to=2021-07-31T23:59:59Z")
-aug_1 <- GET("https://api.covid19api.com/country/united-states?from=2021-08-31T00:00:00Z&to=2021-08-31T23:59:59Z")
-sep_1 <- GET("https://api.covid19api.com/country/united-states?from=2021-09-30T00:00:00Z&to=2021-09-30T23:59:59Z")
+dec_2 <- dec %>% select(Province, Confirmed, Deaths, Active, Date) 
+jan_2 <- jan %>% select(Province, Confirmed, Deaths, Active, Date)
+feb_2 <- feb %>% select(Province, Confirmed, Deaths, Active, Date)
+mar_2 <- mar %>% select(Province, Confirmed, Deaths, Active, Date)
+apr_2 <- apr %>% select(Province, Confirmed, Deaths, Active, Date)
+may_2 <- may %>% select(Province, Confirmed, Deaths, Active, Date)
+jun_2 <- jun %>% select(Province, Confirmed, Deaths, Active, Date)
+jul_2 <- jul %>% select(Province, Confirmed, Deaths, Active, Date)
+aug_2 <- aug %>% select(Province, Confirmed, Deaths, Active, Date)
+sep_2 <- sep %>% select(Province, Confirmed, Deaths, Active, Date)
 
-dec_2 <- rawToChar(dec_1$content)
-jan_2 <- rawToChar(jan_1$content)
-feb_2 <- rawToChar(feb_1$content)
-mar_2 <- rawToChar(mar_1$content)
-apr_2 <- rawToChar(apr_1$content)
-may_2 <- rawToChar(may_1$content)
-jun_2 <- rawToChar(jun_1$content)
-jul_2 <- rawToChar(jul_1$content)
-aug_2 <- rawToChar(aug_1$content)
-sep_2 <- rawToChar(sep_1$content)
+late_date <- rbind(jan_2, feb_2, mar_2, apr_2, may_2, jun_2, jul_2, aug_2, sep_2)
+early_date <- rbind(dec_2, jan_2, feb_2, mar_2, apr_2, may_2, jun_2, jul_2, aug_2)
+```
 
-dec_3 <- fromJSON(dec_2)
-jan_3 <- fromJSON(jan_2)
-feb_3 <- fromJSON(feb_2)
-mar_3 <- fromJSON(mar_2)
-apr_3 <- fromJSON(apr_2)
-may_3 <- fromJSON(may_2)
-jun_3 <- fromJSON(jun_2)
-jul_3 <- fromJSON(jul_2)
-aug_3 <- fromJSON(aug_2)
-sep_3 <- fromJSON(sep_2)
+### Data Manipulation
 
-dec_4 <- dec_3 %>% select(Province, Deaths, Active, Date) 
-jan_4 <- jan_3 %>% select(Province, Deaths, Active, Date)
-feb_4 <- feb_3 %>% select(Province, Deaths, Active, Date)
-mar_4 <- mar_3 %>% select(Province, Deaths, Active, Date)
-apr_4 <- apr_3 %>% select(Province, Deaths, Active, Date)
-may_4 <- may_3 %>% select(Province, Deaths, Active, Date)
-jun_4 <- jun_3 %>% select(Province, Deaths, Active, Date)
-jul_4 <- jul_3 %>% select(Province, Deaths, Active, Date)
-aug_4 <- aug_3 %>% select(Province, Deaths, Active, Date)
-sep_4 <- sep_3 %>% select(Province, Deaths, Active, Date)
+At this point, I have data from every city in each state. So, I grouped
+by *Province* and *Date* and sum up all different case types for each
+state for the same date. I applied this to both data sets. Then, I
+changed the names of the columns in one of the datasets in order to
+perform a column-combination of the two tables afterwards and saved it
+as an object, *mydata1*. Now, *mydata1* is in a format I had in mind
+earlier as shown in the table above.
 
-data_1 <- rbind(jan_4, feb_4, mar_4, apr_4, may_4, jun_4, jul_4, aug_4, sep_4)
-data_2 <- rbind(dec_4, jan_4, feb_4, mar_4, apr_4, may_4, jun_4, jul_4, aug_4)
+``` r
+after_date <- late_date %>% group_by(Province, Date) %>% summarise(across(c(Confirmed, Deaths, Active), sum))
+```
 
-data_11 <- data_1 %>% group_by(Province, Date) %>% summarise(across(c(Deaths, Active), sum))
-data_11
-data_22 <- data_2 %>% group_by(Province, Date) %>% summarise(across(c(Deaths, Active), sum))
-names(data_22) <- c("State", "Date2", "Deaths2", "Active2")
-mydata1 <- cbind(data_11, data_22)
+    ## `summarise()` has grouped output by 'Province'. You can override using the `.groups` argument.
+
+``` r
+before_date <- early_date %>% group_by(Province, Date) %>% summarise(across(c(Confirmed, Deaths, Active), sum))
+```
+
+    ## `summarise()` has grouped output by 'Province'. You can override using the `.groups` argument.
+
+``` r
+names(before_date) <- c("State", "Date2", "Confirmed2", "Deaths2", "Active2")
+mydata1 <- cbind(after_date, before_date)
+mydata1 <- mydata1[-1:-9, ]
 mydata1
-mydata2 <- mydata1 %>% mutate(Death = Deaths - Deaths2, Cases = Active - Active2, Total = Death + Cases, 
-                              Month = rep(c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"))) %>% 
-  select(State, Month, Death, Cases, Total)
-
-write_csv(x = mydata2, path = "../_Data/covid_data.csv")
 ```
+
+    ## # A tibble: 522 x 10
+    ##    Province Date                 Confirmed Deaths Active State   Date2                Confirmed2 Deaths2 Active2
+    ##    <chr>    <chr>                    <int>  <int>  <int> <chr>   <chr>                     <int>   <int>   <int>
+    ##  1 Alabama  2021-01-31T00:00:00Z    459639   7688 451951 Alabama 2020-12-31T00:00:00Z     361226    4827  356399
+    ##  2 Alabama  2021-02-28T00:00:00Z    493252   9929 483323 Alabama 2021-01-31T00:00:00Z     459639    7688  451951
+    ##  3 Alabama  2021-03-31T00:00:00Z    515388  10554 504834 Alabama 2021-02-28T00:00:00Z     493252    9929  483323
+    ##  4 Alabama  2021-04-30T00:00:00Z    527922  10896 517026 Alabama 2021-03-31T00:00:00Z     515388   10554  504834
+    ##  5 Alabama  2021-05-31T00:00:00Z    543405  11146 532259 Alabama 2021-04-30T00:00:00Z     527922   10896  517026
+    ##  6 Alabama  2021-06-30T00:00:00Z    550983  11352 539631 Alabama 2021-05-31T00:00:00Z     543405   11146  532259
+    ##  7 Alabama  2021-07-31T00:00:00Z    585607  11536 574071 Alabama 2021-06-30T00:00:00Z     550983   11352  539631
+    ##  8 Alabama  2021-08-31T00:00:00Z    699729  12283 687446 Alabama 2021-07-31T00:00:00Z     585607   11536  574071
+    ##  9 Alabama  2021-09-30T00:00:00Z    796475  14299 782176 Alabama 2021-08-31T00:00:00Z     699729   12283  687446
+    ## 10 Alaska   2021-01-31T00:00:00Z     54350    262  54088 Alaska  2020-12-31T00:00:00Z      47014     206   46808
+    ## # ... with 512 more rows
+
+### Creating Variables
+
+Now we are ready to subtract each case type from itself from the
+previous month and obtain the total number of confirmed cases, active
+cases and deaths for each month for each state. Then, we can compare
+those numbers between different states.
+
+Four variables are created here, and we do not keep the old variables we
+used to compute the new ones. These variables are now representative
+numbers for the corresponding month and state. They are no longer the
+cumulative figures.
+
+-   *Total*  
+-   *Month*  
+-   *Deaths*  
+-   *Active*
+
+You can also save this data to your local drive in case of an unexpected
+event occurred such as website maintenance.
+
+``` r
+mydata2 <- mydata1 %>% mutate(Total = Confirmed - Confirmed2, Death = Deaths - Deaths2, Active_cases = Active - Active2, 
+                              Month = rep(c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"))) %>% 
+  select(State, Month, Total, Death, Active_cases)
+```
+
+    ## Adding missing grouping variables: `Province`
+
+``` r
+names(mydata2) <- c("Province","State", "Month", "Total", "Deaths", "Active")
+mydata2
+```
+
+    ## # A tibble: 522 x 6
+    ##    Province State   Month  Total Deaths Active
+    ##    <chr>    <chr>   <chr>  <int>  <int>  <int>
+    ##  1 Alabama  Alabama Jan    98413   2861  95552
+    ##  2 Alabama  Alabama Feb    33613   2241  31372
+    ##  3 Alabama  Alabama Mar    22136    625  21511
+    ##  4 Alabama  Alabama Apr    12534    342  12192
+    ##  5 Alabama  Alabama May    15483    250  15233
+    ##  6 Alabama  Alabama Jun     7578    206   7372
+    ##  7 Alabama  Alabama Jul    34624    184  34440
+    ##  8 Alabama  Alabama Aug   114122    747 113375
+    ##  9 Alabama  Alabama Sep    96746   2016  94730
+    ## 10 Alaska   Alaska  Jan     7336     56   7280
+    ## # ... with 512 more rows
+
+``` r
+# write_csv(x = mydata2, path = "../_Data/covid_data.csv")
+```
+
+### Creating an Infix Function and Categorical Variables
+
+Upon inspecting the data, I discovered eight states I did not want to be
+included in the data analysis. So, I created an infix function, `%!in%`,
+that is negation of the infix function, `%in%`. I used it to filter the
+rows whenever *Province* contains those states. These states I excluded
+from the data are: “American Samoa”, “Diamond Princess”, “Grand
+Princess”, “Guam”, “Northern Mariana Islands”, “Puerto Rico” and “Virgin
+Islands”. They may be potential outliers since their number of cases may
+be really low for each case type.
+
+I used `mutate` function to create three categorical variables using the
+numerical variables we just obtained.
+
+-   *f500\_deaths* (2 levels):
+    -   Less than 500 deaths  
+    -   More than 500 deaths
+-   *Total\_cases* (3 levels):
+    -   Less than 9,000 cases  
+    -   Between 9,000 and 30,000 cases  
+    -   More than 30,000 cases
+-   *vaccine* (3 levels):
+    -   Vaccine-ING (Jan, Feb, Mar, Apr)  
+    -   Some vaccined (May, Jun, Jul)  
+    -   Back to school (Aug, Sep)
 
 ``` r
 `%!in%` <- Negate(`%in%`)
 
-mydata3 <- mydata2 %>% filter(Province %!in% c("American Samoa", "Diamond Princess", "Grand Princess", "Guam", "Northern Mariana Islands", "Puerto Rico", "Virgin Islands")) %>% 
-  mutate(f500_deaths = if_else(Death < 500, "Less than 500 deaths", "More than 500 deaths"), 
-         Total_cases = if_else(Total < 9000, "1. Less than 9000", 
-                             if_else(Total < 30000, "2. Between 9000 and 30,000", "3. More than 30,000")), 
-         vaccine = if_else(Month %in% c("Jan", "Feb", "Mar", "Apr"), "1. Vaccine-ing", 
-                           if_else(Month %in% c("May", "Jun", "Jul"), "2. Some vaccined", "3. Back to school")))
-dim(mydata3)
-names(mydata3)
-# 1st contingency table
-table(mydata3$Total_cases, mydata3$vaccine)
+mydata3 <- mydata2 %>% filter(Province %!in% c("American Samoa", "Diamond Princess", "Grand Princess", "Guam", "Northern Mariana Islands", "Puerto Rico", "Virgin Islands", " ")) %>% 
+  mutate(f500_deaths = if_else(Deaths < 500, 1, 2), 
+         Total_cases = if_else(Total < 9000, 1, 
+                             if_else(Total < 30000, 2, 3)), 
+         vaccine = if_else(Month %in% c("Jan", "Feb", "Mar", "Apr"), 1, 
+                           if_else(Month %in% c("May", "Jun", "Jul"), 2, 3)))
 
+mydata3$f500_deaths <- cut(mydata3$f500_deaths, 2, c("Less than 500 deaths", "More than 500 deaths"))
+mydata3$Total_cases <- cut(mydata3$Total_cases, 3, c("Less than 9,000 cases", "Between 9,000 and 30,000 cases", "More than 30,000 cases"))
+mydata3$vaccine <- cut(mydata3$vaccine, 3, c("Vaccine-ING", "Some vaccined", "Back to school"))
+```
+
+## Contingency Tables
+
+Now we have 51 states, and each state has nine months worth of data.
+Therefore, 51 x 9 = 459 rows in the data. Each event in Table 1
+represents one state and one month. However, since “Vaccine-ing” period
+has 4 months, “Some vaccined” period contains 3 months and “Back to
+school” period only has 2 months, the data is not on a even scale for
+the three categories. Hence, we cannot compare them across columns. We
+can only compare them down the rows within each column.
+
+During the “Vaccine-ING” period (Jan-Apr), most of the states appeared
+with more than 30,000 cases per month. However, that number dropped
+during “Some vaccined” period (May-Jul). A lot of the events
+(month&state) were having less than 9,000 cases. This incident should
+tell us that the Covid-19 vaccines were working its magic during this
+time. Unfortunately, the number of events went back up to having more
+than 30,000 cases during “Back to school” period when students were
+going back to classrooms, in-person delivery teaching method.
+
+Table 2 and Table 3 show the total confirmed cases and total number of
+deaths between the states known to have the most cases from January to
+September 2021 compared to North Carolina. One interesting finding is
+that the number of total confirmed cases were slowly dropping for each
+state during “Vaccine-ing” period and then reached the minimum number of
+cases of all time during “some vaccined” period. However, that number
+went back up when students went back to schools. The number total
+confirmed cases were almost equivalent to those numbers back in January
+for most states. This is why state of North Carolina reinforced the mask
+mandate again in August 2021.
+
+Since there are more cases in each state, there will be more deaths. If
+the number of cases are less, the number of deaths will be less in each
+state as well. It is difficult to see this in a table. Let’s visualize
+these data with different plots in the plots section.
+
+``` r
+# 1st contingency table
+table(mydata3$Total_cases, mydata3$vaccine) %>% kable(caption = "Table 1. Total Confirmed Cases vs. Vaccine Timeline")
+```
+
+|                                | Vaccine-ING | Some vaccined | Back to school |
+|:-------------------------------|------------:|--------------:|---------------:|
+| Less than 9,000 cases          |          46 |            79 |             10 |
+| Between 9,000 and 30,000 cases |          63 |            51 |             24 |
+| More than 30,000 cases         |          95 |            23 |             68 |
+
+Table 1. Total Confirmed Cases vs. Vaccine Timeline
+
+``` r
 # 2nd contingency table
 mydata3 %>% filter(Province %in% c("California", "New York", "Florida", "Texas", "Michigan", "North Carolina")) %>% 
-  select(Province, Month, Death) %>%
-  pivot_wider(names_from = "Month", values_from = "Death") %>% arrange(desc(Jan))
+  select(Province, Month, Deaths) %>%
+  pivot_wider(names_from = "Month", values_from = "Deaths") %>% arrange(desc(Jan)) %>% 
+  kable(caption = "Table 2. Number of Deaths for Each Month across Different States")
+```
+
+| Province       |   Jan |   Feb |  Mar |  Apr |  May | Jun |  Jul |  Aug |   Sep |
+|:---------------|------:|------:|-----:|-----:|-----:|----:|-----:|-----:|------:|
+| California     | 14994 | 11621 | 6373 | 2463 | 1263 | 813 |  888 | 1448 |  3257 |
+| Texas          |  9008 |  6623 | 4555 | 1967 | 1289 | 829 |  940 | 3767 |  8159 |
+| New York       |  5651 |  3967 | 2680 | 1958 | 1043 | 372 |  171 |  613 |  1104 |
+| Florida        |  4806 |  4373 | 2573 | 1736 | 1613 | 998 | 1307 | 5482 | 10448 |
+| North Carolina |  2587 |  1877 |  900 |  539 |  427 | 359 |  198 |  833 |  2056 |
+| Michigan       |  2489 |   977 |  610 | 1629 | 1627 | 620 |  187 |  359 |   808 |
+
+Table 2. Number of Deaths for Each Month across Different States
+
+``` r
 # 3rd contingency table
 mydata3 %>% filter(Province %in% c("California", "New York", "Florida", "Texas", "Michigan", "North Carolina")) %>% 
   select(Province, Month, Total) %>%
-  pivot_wider(names_from = "Month", values_from = "Total") %>% arrange(desc(Jan))
-
-# summaries
-summary3 <- mydata3 %>% group_by(Province, vaccine) %>% 
-  summarise(avg_total = round(mean(Total)), sd_total = round(sd(Total)), median_total = round(median(Total)), IQR_total = round(IQR(Total)))
-
-summary4 <- mydata3 %>% group_by(Province, vaccine) %>% 
-  summarise(avg_death = mean(Death), sd_death = sd(Death), median_death = median(Death), IQR_death = IQR(Death))
+  pivot_wider(names_from = "Month", values_from = "Total") %>% arrange(desc(Jan)) %>% 
+  kable(caption = "Table 3. Total Confirmed Cases for Each Month across Different States")
 ```
+
+| Province       |    Jan |    Feb |    Mar |    Apr |   May |   Jun |    Jul |    Aug |    Sep |
+|:---------------|-------:|-------:|-------:|-------:|------:|------:|-------:|-------:|-------:|
+| California     | 997110 | 241898 | 100463 |  76039 | 49031 | 29059 | 148305 | 432125 | 268073 |
+| Texas          | 603560 | 276669 | 138897 | 102018 | 59481 | 46660 | 138768 | 473409 | 456018 |
+| New York       | 441124 | 223960 | 229271 | 175012 | 54254 | 12582 |  35404 | 128200 | 148093 |
+| Florida        | 398062 | 187844 | 148514 | 175783 | 87300 | 44646 | 268770 | 616220 | 332353 |
+| North Carolina | 217981 | 101022 |  55584 |  55620 | 31402 | 12535 |  34387 | 165578 | 181600 |
+| Michigan       |  78775 |  34297 |  99685 | 189525 | 55110 |  8209 |  11064 |  49187 |  89646 |
+
+Table 3. Total Confirmed Cases for Each Month across Different States
+
+## Numerical Summaries
+
+Table 4 and Table 5 shows the numerical summaries of active cases and
+deaths during each vaccine timeline for North Carolina and its
+neighbors. North Carolina was placed pretty high regarding to the active
+cases for each timeline right below Georgia, followed by Tennessee.
+Shockingly, the average active cases for “back to school” period all
+exceeded the average active cases for “vaccine-ing” period for every
+state with Virginia being a close-call. The number was almost doubled
+for some states or more than doubled for Tennessee. This indicates that
+“back to school” event drove the number of cases up in each state and
+counterattacked the great effect brought by wide-spread vaccine
+administration. The effect of vaccine is shown in the “some vaccined”
+period that drove the average active cases down.
+
+However, the effect of “going back to school” event is not as dramatic
+as shown in Table 4 as in Table 5. The number of deaths did go up during
+“back to school” period due to elevated number of active cases in the
+same period, however, that number was not almost doubled or doubled.
+They were only matching or even. This could be the vaccines were
+developing antibodies and immunity in our body, and hence, the infected
+individuals had a better chance to fight the virus and survived during
+“back to school” period. People should really get their vaccine shots if
+they have not already.
+
+``` r
+mydata3 %>% filter(Province %in% c("North Carolina", "South Carolina", "Tennessee","Georgia", "Virginia")) %>% 
+  group_by(Province, vaccine) %>% 
+  summarise(Avg_active = mean(Active), SD_active = sd(Active), Median_active = median(Active), IQR_active = IQR(Active)) %>% 
+  kable(digit = 2, caption = "Table 4. Active cases per vaccine timeline for North Carolina and its neighbors.")
+```
+
+| Province       | vaccine        | Avg\_active | SD\_active | Median\_active | IQR\_active |
+|:---------------|:---------------|------------:|-----------:|---------------:|------------:|
+| Georgia        | Vaccine-ING    |   106119.75 |   92096.53 |        72623.0 |    82090.25 |
+| Georgia        | Some vaccined  |    25925.33 |   17422.78 |        23007.0 |    17238.50 |
+| Georgia        | Back to school |   197429.50 |   36259.73 |       197429.5 |    25639.50 |
+| North Carolina | Vaccine-ING    |   106076.00 |   75806.97 |        77113.0 |    73225.50 |
+| North Carolina | Some vaccined  |    25780.00 |   11890.50 |        30975.0 |    11006.50 |
+| North Carolina | Back to school |   172144.50 |   10464.47 |       172144.5 |     7399.50 |
+| South Carolina | Vaccine-ING    |    66737.75 |   49099.03 |        53070.0 |    55158.25 |
+| South Carolina | Some vaccined  |    12694.00 |    8488.12 |        14364.0 |     8364.00 |
+| South Carolina | Back to school |   118835.00 |    1965.76 |       118835.0 |     1390.00 |
+| Tennessee      | Vaccine-ING    |    63834.50 |   49860.35 |        40863.5 |    32533.00 |
+| Tennessee      | Some vaccined  |    15199.00 |   11000.60 |        14727.0 |    10993.00 |
+| Tennessee      | Back to school |   166274.00 |   12406.90 |       166274.0 |     8773.00 |
+| Virginia       | Vaccine-ING    |    76067.00 |   53515.94 |        55204.5 |    49384.50 |
+| Virginia       | Some vaccined  |    11344.00 |    5918.52 |        13927.0 |     5479.50 |
+| Virginia       | Back to school |    85587.00 |   19581.20 |        85587.0 |    13846.00 |
+
+Table 4. Active cases per vaccine timeline for North Carolina and its
+neighbors.
+
+``` r
+mydata3 %>% filter(Province %in% c("North Carolina", "South Carolina", "Tennessee","Georgia", "Virginia")) %>% 
+  group_by(Province, vaccine) %>% 
+  summarise(Average = mean(Deaths), SD = sd(Deaths), Median = median(Deaths), IQR = IQR(Deaths)) %>% 
+  kable(digit = 2, caption = "Table 5. Number of deaths per vaccine timeline for North Carolina and its neighbors.")
+```
+
+| Province       | vaccine        | Average |      SD | Median |     IQR |
+|:---------------|:---------------|--------:|--------:|-------:|--------:|
+| Georgia        | Vaccine-ING    | 2314.00 | 1034.82 | 2428.5 | 1535.00 |
+| Georgia        | Some vaccined  |  495.33 |  212.07 |  586.0 |  197.00 |
+| Georgia        | Back to school | 2204.00 | 1612.20 | 2204.0 | 1140.00 |
+| North Carolina | Vaccine-ING    | 1475.75 |  931.82 | 1388.5 | 1244.75 |
+| North Carolina | Some vaccined  |  328.00 |  117.61 |  359.0 |  114.50 |
+| North Carolina | Back to school | 1444.50 |  864.79 | 1444.5 |  611.50 |
+| South Carolina | Vaccine-ING    | 1050.25 |  678.63 | 1052.0 | 1026.75 |
+| South Carolina | Some vaccined  |  135.67 |   89.49 |   85.0 |   78.00 |
+| South Carolina | Back to school | 1284.00 |  834.39 | 1284.0 |  590.00 |
+| Tennessee      | Vaccine-ING    | 1322.50 | 1148.63 | 1127.0 | 1563.50 |
+| Tennessee      | Some vaccined  |  175.67 |   62.63 |  162.0 |   61.50 |
+| Tennessee      | Back to school | 1209.00 |  643.47 | 1209.0 |  455.00 |
+| Virginia       | Vaccine-ING    | 1434.50 |  667.72 | 1566.0 |  593.50 |
+| Virginia       | Some vaccined  |  254.00 |  151.06 |  229.0 |  149.50 |
+| Virginia       | Back to school |  609.00 |  422.85 |  609.0 |  299.00 |
+
+Table 5. Number of deaths per vaccine timeline for North Carolina and
+its neighbors.
+
+## Explanatory Data Analysis
+
+### Barplots
+
+### Boxplots
+
+### Scatterplot
+
+### Histogram
+
+### Line Plots
 
 ``` r
 library(tidyverse)
