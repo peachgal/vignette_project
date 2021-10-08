@@ -651,6 +651,7 @@ before_date <- early_date %>% group_by(Province, Date) %>% summarise(across(c(Co
 
 names(before_date) <- c("State", "Date2", "Confirmed2", "Deaths2", "Active2")
 mydata1 <- cbind(after_date, before_date)
+alldata <- mydata1[1:9, ]
 mydata1 <- mydata1[-1:-9, ]
 mydata1
 ```
@@ -844,9 +845,9 @@ boxplot2 + geom_boxplot(fill = "white", outlier.shape = NA) +
 
 Figure 5 scatterplot shows the relationship between number of active cases and number of deaths for different timelines in US. We can already guess that the relationship between active cases and deaths is a strong positive correlation. However, will that correlation stay the same between them for all vaccine time groups? Apparently not! Figure 5 indicates that in the "vaccinat-ing" period, the correlation between active cases and deaths is the strongest compared to the other two time groups. However, when the vaccine shots were taken place across US, approximately 40% of the population were vaccinated and together with the State-mandated restrictions during "some vaccinated" period, despite the increasing active cases, deaths were not imminent in this period. The active cases and number of deaths have the weakest correlation in the "some vaccinated" period. 
 
-Furthermore, despite also increased number of active cases in the "back to school" period, the correlation between number of deaths and active cases is still not nearly as strong as they are in the "vaccinat-ing" period. Table 6, the correlation table, coincides with the findings shown in Figure 5.
+Furthermore, despite also increased number of active cases in the "back to school" period, the correlation between number of deaths and active cases is still not nearly as strong as they are in the "vaccinat-ing" period. Table 6, the correlation table, coincides with our findings shown in Figure 5.
 
-Once again, the plot is showing vaccines are helping the population to fight the virus. Despite students going back to schools, infected but fully vaccinated individuals may have better surviving odds against the virus. I apologize again that due to some large number outliters, I have to zoom-in on the action part to see the relationships better.
+Once again, the plot is showing vaccines are helping the population to fight the virus. Despite students going back to schools and the more contagious and virulent Delta variant, the infected but fully vaccinated individuals may have better surviving odds against the virus. I apologize again that due to some large number outliters, I have to zoom-in on the action part to see the relationships better.
 
 ```{r eval=TRUE}
 sub1 <- mydata3 %>% filter(vaccine %in% c("Vaccinat-ING"))
@@ -932,4 +933,36 @@ lineplot1 + geom_line(aes(group = State), lwd = 2) + geom_point() +
 ```
 
 ## 6. Conclusion
+
+
+
+```{r eval=TRUE}
+alldata
+
+overall <- alldata %>% mutate(Active_cases = Active - Active2, Death = Deaths - Deaths2, Total = Confirmed - Confirmed2, 
+                   Month = rep(c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"))) 
+overall$Month <- factor(overall$Month, levels = unique(overall$Month))
+
+lineplot3 <- ggplot(data = overall, aes(x = Month, y = Active_cases))
+lineplot3 + geom_line(lwd = 2) + geom_point() + 
+  labs(y = "Active Cases", title = "Figure 9. Total USA active cases each month") + 
+  theme(axis.text.x = element_text(size = 10), 
+        axis.text.y = element_text(size = 10), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15), 
+        legend.key.size = unit(1, 'cm'), 
+        legend.text = element_text(size = 13), 
+        title = element_text(size = 13))
+#mydata2 <- mydata1 %>% mutate(Total = Confirmed - Confirmed2, Death = Deaths - Deaths2, Active_cases = Active - Active2, 
+#                              Month = rep(c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"))) %>% 
+#  select(State, Month, Total, Death, Active_cases)
+#names(mydata2) <- c("Province","State", "Month", "Total", "Deaths", "Active")
+#mydata2
+
+
+```
+
+
+
+
 

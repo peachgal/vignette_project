@@ -808,6 +808,7 @@ before_date <- early_date %>% group_by(Province, Date) %>% summarise(across(c(Co
 
 names(before_date) <- c("State", "Date2", "Confirmed2", "Deaths2", "Active2")
 mydata1 <- cbind(after_date, before_date)
+alldata <- mydata1[1:9, ]
 mydata1 <- mydata1[-1:-9, ]
 mydata1
 ```
@@ -1243,14 +1244,15 @@ the “some vaccinated” period.
 Furthermore, despite also increased number of active cases in the “back
 to school” period, the correlation between number of deaths and active
 cases is still not nearly as strong as they are in the “vaccinat-ing”
-period. Table 6, the correlation table, coincides with the findings
+period. Table 6, the correlation table, coincides with our findings
 shown in Figure 5.
 
 Once again, the plot is showing vaccines are helping the population to
-fight the virus. Despite students going back to schools, infected but
-fully vaccinated individuals may have better surviving odds against the
-virus. I apologize again that due to some large number outliters, I have
-to zoom-in on the action part to see the relationships better.
+fight the virus. Despite students going back to schools and the more
+contagious and virulent Delta variant, the infected but fully vaccinated
+individuals may have better surviving odds against the virus. I
+apologize again that due to some large number outliters, I have to
+zoom-in on the action part to see the relationships better.
 
 ``` r
 sub1 <- mydata3 %>% filter(vaccine %in% c("Vaccinat-ING"))
@@ -1389,3 +1391,49 @@ lineplot1 + geom_line(aes(group = State), lwd = 2) + geom_point() +
 ![](/images/unnamed-chunk-15-2.png)<!-- -->
 
 ## 6. Conclusion
+
+``` r
+alldata
+```
+
+    ## # A tibble: 9 x 10
+    ##   Province Date                 Confirmed Deaths   Active State Date2                Confirmed2 Deaths2  Active2
+    ##   <chr>    <chr>                    <int>  <int>    <int> <chr> <chr>                     <int>   <int>    <int>
+    ## 1 ""       2021-01-31T00:00:00Z  26300968 449198 25799922 ""    2020-12-31T00:00:00Z   20153407  352001 19748034
+    ## 2 ""       2021-02-28T00:00:00Z  28701621 514823 28136320 ""    2021-01-31T00:00:00Z   26300968  449198 25799922
+    ## 3 ""       2021-03-31T00:00:00Z  30514599 552328 29912496 ""    2021-02-28T00:00:00Z   28701621  514823 28136320
+    ## 4 ""       2021-04-30T00:00:00Z  32403009 576119 31774444 ""    2021-03-31T00:00:00Z   30514599  552328 29912496
+    ## 5 ""       2021-05-31T00:00:00Z  33321318 594293 32673092 ""    2021-04-30T00:00:00Z   32403009  576119 31774444
+    ## 6 ""       2021-06-30T00:00:00Z  33720689 604620 33060180 ""    2021-05-31T00:00:00Z   33321318  594293 32673092
+    ## 7 ""       2021-07-31T00:00:00Z  35037755 613361 34365119 ""    2021-06-30T00:00:00Z   33720689  604620 33060180
+    ## 8 ""       2021-08-31T00:00:00Z  39321999 641224 38557964 ""    2021-07-31T00:00:00Z   35037755  613361 34365119
+    ## 9 ""       2021-09-30T00:00:00Z  43460343 698395 42761967 ""    2021-08-31T00:00:00Z   39321999  641224 38557964
+
+``` r
+overall <- alldata %>% mutate(Active_cases = Active - Active2, Death = Deaths - Deaths2, Total = Confirmed - Confirmed2, 
+                   Month = rep(c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"))) 
+overall$Month <- factor(overall$Month, levels = unique(overall$Month))
+
+lineplot3 <- ggplot(data = overall, aes(x = Month, y = Active_cases))
+lineplot3 + geom_line(lwd = 2) + geom_point() + 
+  labs(y = "Active Cases", title = "Figure 9. Total USA active cases each month") + 
+  theme(axis.text.x = element_text(size = 10), 
+        axis.text.y = element_text(size = 10), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15), 
+        legend.key.size = unit(1, 'cm'), 
+        legend.text = element_text(size = 13), 
+        title = element_text(size = 13))
+```
+
+    ## geom_path: Each group consists of only one observation. Do you need to adjust the group aesthetic?
+
+![](/images/unnamed-chunk-16-1.png)<!-- -->
+
+``` r
+#mydata2 <- mydata1 %>% mutate(Total = Confirmed - Confirmed2, Death = Deaths - Deaths2, Active_cases = Active - Active2, 
+#                              Month = rep(c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"))) %>% 
+#  select(State, Month, Total, Death, Active_cases)
+#names(mydata2) <- c("Province","State", "Month", "Total", "Deaths", "Active")
+#mydata2
+```
