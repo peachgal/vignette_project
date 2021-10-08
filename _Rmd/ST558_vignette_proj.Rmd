@@ -5,7 +5,7 @@ date: "10/07/2021"
 ---
 
 ```{r setup, message=FALSE, warning=FALSE}
-knitr::opts_chunk$set(fig.path = "/images/")
+knitr::opts_chunk$set(fig.path = "../images/")
 ```
 
 
@@ -937,8 +937,7 @@ lineplot2 + geom_line(aes(group = State), lwd = 2) + geom_point() +
 
 
 ```{r eval=TRUE}
-alldata
-
+#alldata
 overall <- alldata %>% mutate(Active_cases = Active - Active2, Death = Deaths - Deaths2, Total = Confirmed - Confirmed2, 
                    Month = rep(c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"))) 
 overall$Month <- factor(overall$Month, levels = unique(overall$Month))
