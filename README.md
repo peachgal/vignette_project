@@ -24,13 +24,13 @@ Jasmine Wang
     -   [Conclusion](#conclusion)
 
 ``` r
-knitr::opts_chunk$set(fig.path = "../images/")
+knitr::opts_chunk$set(fig.path = "/images/")
 ```
 
 ``` r
 rmarkdown::render("C:/Users/peach/Documents/ST558/ST558_repos/vignette_project/_Rmd/ST558_vignette_proj.Rmd", 
                   output_format = "github_document", 
-                  output_file = "C:/Users/peach/documents/ST558/ST558_repos/vignette_project/_README/README.md", 
+                  output_file = "C:/Users/peach/documents/ST558/ST558_repos/vignette_project/README.md", 
                   output_options = list(html_preview = FALSE, toc = TRUE, toc_depth = 3, df_print = "tibble")
 )
 ```
@@ -1135,7 +1135,7 @@ g + geom_bar(stat = "identity", position = "dodge") +
         title = element_text(size = 13))
 ```
 
-![](../images/unnamed-chunk-11-1.png)<!-- -->
+![](/images/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
 d <- ggplot(data = barplot2, aes(x = Province, y = Average, fill = vaccine))
@@ -1151,7 +1151,7 @@ d + geom_bar(stat = "identity", position = "dodge") +
         title = element_text(size = 13))
 ```
 
-![](../images/unnamed-chunk-11-2.png)<!-- -->
+![](/images/unnamed-chunk-11-2.png)<!-- -->
 
 #### Box-Plots
 
@@ -1193,7 +1193,7 @@ boxplot1 + geom_boxplot(fill = "white", outlier.shape = NA) +
         title = element_text(size = 14))
 ```
 
-![](../images/unnamed-chunk-12-1.png)<!-- -->
+![](/images/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
 boxplot2 <- ggplot(data = mydata3, aes(x = vaccine, y = Deaths))
@@ -1210,7 +1210,7 @@ boxplot2 + geom_boxplot(fill = "white", outlier.shape = NA) +
         title = element_text(size = 14))
 ```
 
-![](../images/unnamed-chunk-12-2.png)<!-- -->
+![](/images/unnamed-chunk-12-2.png)<!-- -->
 
 #### Scatterplot
 
@@ -1277,7 +1277,7 @@ scatter + geom_point(aes(shape = f500_deaths),size = 3) +
 
     ## `geom_smooth()` using formula 'y ~ x'
 
-![](../images/unnamed-chunk-13-1.png)<!-- -->
+![](/images/unnamed-chunk-13-1.png)<!-- -->
 
 ``` r
 #scale_fill_discrete(name = NULL)
@@ -1315,7 +1315,7 @@ his + geom_histogram() +
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](../images/unnamed-chunk-14-1.png)<!-- -->
+![](/images/unnamed-chunk-14-1.png)<!-- -->
 
 #### Line Plots
 
@@ -1359,7 +1359,7 @@ lineplot1 + geom_line(aes(group = State), lwd = 2) + geom_point() +
         title = element_text(size = 13))
 ```
 
-![](../images/unnamed-chunk-15-1.png)<!-- -->
+![](/images/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
 lineplot1 <- ggplot(data = neighbor, aes(x = Month, y = Deaths, color = State))
@@ -1374,6 +1374,6 @@ lineplot1 + geom_line(aes(group = State), lwd = 2) + geom_point() +
         title = element_text(size = 13))
 ```
 
-![](../images/unnamed-chunk-15-2.png)<!-- -->
+![](/images/unnamed-chunk-15-2.png)<!-- -->
 
 ### Conclusion
