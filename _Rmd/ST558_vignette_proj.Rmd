@@ -2,15 +2,14 @@
 title: "ST558 - Vignette Project - Covid-19 Data"
 author: "Jasmine Wang"
 date: "10/07/2021"
-output: html_document
 ---
 
-```{r setup, message=FALSE, warning=FALSE}
+```{r setup, message=FALSE, warning=FALSE, echo=FALSE}
 knitr::opts_chunk$set(fig.path = "../images/")
 ```
 
 
-```{r echo=TRUE, eval=FALSE}
+```{r echo=FALSE, eval=FALSE}
 rmarkdown::render("C:/Users/peach/Documents/ST558/ST558_repos/vignette_project/_Rmd/ST558_vignette_proj.Rmd", 
                   output_format = "github_document", 
                   output_file = "C:/Users/peach/documents/ST558/ST558_repos/vignette_project/README.md", 
@@ -45,12 +44,13 @@ Below is a list of packages needed to create the vignette:
 * `tidyverse`  
 * `ggplot2`  
 
-```{r eval=TRUE, echo=TRUE, warning=FALSE, message=FALSE}
+```{r eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
 library(knitr)
 library(httr)
 library(jsonlite)
 library(tidyverse)
 library(countrycode)
+library(ggplot2)
 
 ######## General summary/countries/all####################################################
 general_input <- function(gen_input, ...){
@@ -510,7 +510,7 @@ If more argument inputs are needed, subsequent order of the arguments is:
 
 If the desired API URL the users get from the `choose_api` function is correct, the same exact arguments used in `choose_api` should be used again in `get_data` function to query the data from Covid-19 API site. For more information about what the API URL should look like, please visit the [Covid-19 API site](https://documenter.getpostman.com/view/10808728/SzS8rjbc).
 
-```{r eval=TRUE, cache=TRUE}
+```{r eval=TRUE}
 choose_api <- function(type, ...) {
   
   switch(type,
@@ -615,7 +615,7 @@ North Carolina   | 5638 (Feb 2021)   | 4569 (Jan 2021)    | 588 (Feb 2021)  | 56
 North Carolina   | 5883 (Mar 2021)   | 5638 (Feb 2021)    | 638 (Mar 2021)  | 588 (Feb 2021)   | March
 ...
 
-```{r eval=TRUE, cache=FALSE}
+```{r eval=TRUE}
 dec <- get_data(5, "usa", date_from="2020 12 31", date_to="2020 12 31", time_to="23:59:59")
 jan <- get_data(5, "usa", date_from="2021 1 31", date_to="2021 1 31", time_to="23:59:59")
 feb <- get_data(5, "usa", date_from="2021 2 28", date_to="2021 2 28", time_to="23:59:59")
@@ -627,16 +627,16 @@ jul <- get_data(5, "usa", date_from="2021 7 31", date_to="2021 7 31", time_to="2
 aug <- get_data(5, "usa", date_from="2021 8 31", date_to="2021 8 31", time_to="23:59:59")
 sep <- get_data(5, "usa", date_from="2021 9 30", date_to="2021 9 30", time_to="23:59:59")
 
-dec_2 <- dec %>% select(Province, Confirmed, Deaths, Active, Date) 
-jan_2 <- jan %>% select(Province, Confirmed, Deaths, Active, Date)
-feb_2 <- feb %>% select(Province, Confirmed, Deaths, Active, Date)
-mar_2 <- mar %>% select(Province, Confirmed, Deaths, Active, Date)
-apr_2 <- apr %>% select(Province, Confirmed, Deaths, Active, Date)
-may_2 <- may %>% select(Province, Confirmed, Deaths, Active, Date)
-jun_2 <- jun %>% select(Province, Confirmed, Deaths, Active, Date)
-jul_2 <- jul %>% select(Province, Confirmed, Deaths, Active, Date)
-aug_2 <- aug %>% select(Province, Confirmed, Deaths, Active, Date)
-sep_2 <- sep %>% select(Province, Confirmed, Deaths, Active, Date)
+dec_2 <- as_tibble(dec) %>% select(Province, Confirmed, Deaths, Active, Date) 
+jan_2 <- as_tibble(jan) %>% select(Province, Confirmed, Deaths, Active, Date)
+feb_2 <- as_tibble(feb) %>% select(Province, Confirmed, Deaths, Active, Date)
+mar_2 <- as_tibble(mar) %>% select(Province, Confirmed, Deaths, Active, Date)
+apr_2 <- as_tibble(apr) %>% select(Province, Confirmed, Deaths, Active, Date)
+may_2 <- as_tibble(may) %>% select(Province, Confirmed, Deaths, Active, Date)
+jun_2 <- as_tibble(jun) %>% select(Province, Confirmed, Deaths, Active, Date)
+jul_2 <- as_tibble(jul) %>% select(Province, Confirmed, Deaths, Active, Date)
+aug_2 <- as_tibble(aug) %>% select(Province, Confirmed, Deaths, Active, Date)
+sep_2 <- as_tibble(sep) %>% select(Province, Confirmed, Deaths, Active, Date)
 
 late_date <- rbind(jan_2, feb_2, mar_2, apr_2, may_2, jun_2, jul_2, aug_2, sep_2)
 early_date <- rbind(dec_2, jan_2, feb_2, mar_2, apr_2, may_2, jun_2, jul_2, aug_2)
@@ -670,7 +670,7 @@ Four variables are created here, and we do not keep the old variables we used to
 
 You can also save this data to your local drive in case of an unexpected event occurred such as website maintenance. 
 
-```{r eval=TRUE, cache=FALSE}
+```{r eval=TRUE}
 mydata2 <- mydata1 %>% mutate(Total = Confirmed - Confirmed2, Death = Deaths - Deaths2, Active_cases = Active - Active2, 
                               Month = rep(c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"))) %>% 
   select(State, Month, Total, Death, Active_cases)
@@ -700,7 +700,7 @@ I used `mutate` function to create three categorical variables using the numeric
     + Some vaccinated (May, Jun, Jul)  
     + Back to school (Aug, Sep)  
     
-```{r eval=TRUE, cache=TRUE}
+```{r eval=TRUE}
 `%!in%` <- Negate(`%in%`)
 
 mydata3 <- mydata2 %>% filter(Province %!in% c("American Samoa", "Diamond Princess", "Grand Princess", "Guam", "Northern Mariana Islands", "Puerto Rico", "Virgin Islands", " ")) %>% 
