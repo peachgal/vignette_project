@@ -1392,6 +1392,8 @@ lineplot2 + geom_line(aes(group = State), lwd = 2) + geom_point() +
 
 ## 6. Conclusion
 
+The total active cases and deaths in the United States for all of its states shown in Figure 9 and Figure 10 are very similar to the pattern we haven seen in Figure 7 and Figure 8. They all decreased slowly for the first six months and reached all time low active cases in June and all time low number of deaths in July. However, they quickly went back up in August and September. This coincides with our findings in the previous plots, numerical summaries and contingency tables. Overall, I believe the data did show with the help of vaccine and state-wide mandates do slow down the spread of the virus and boost our immunity against the virus, despite the new addition of the more contagious and virulent Delta variant. We just have to continue following the Covid-19 guidelines and get vaccinated. 
+
 ``` r
 alldata
 ```
