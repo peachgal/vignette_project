@@ -1376,8 +1376,8 @@ lineplot1 + geom_line(aes(group = State), lwd = 2) + geom_point() +
 ![](/images/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
-lineplot1 <- ggplot(data = neighbor, aes(x = Month, y = Deaths, color = State))
-lineplot1 + geom_line(aes(group = State), lwd = 2) + geom_point() + 
+lineplot2 <- ggplot(data = neighbor, aes(x = Month, y = Deaths, color = State))
+lineplot2 + geom_line(aes(group = State), lwd = 2) + geom_point() + 
   labs(y = "Total Deaths", title = "Figure 8. Number of deaths each month in NC and its neighbors") + 
   theme(axis.text.x = element_text(size = 10), 
         axis.text.y = element_text(size = 10), 
@@ -1416,13 +1416,11 @@ overall$Month <- factor(overall$Month, levels = unique(overall$Month))
 
 lineplot3 <- ggplot(data = overall, aes(x = Month, y = Active_cases))
 lineplot3 + geom_line(lwd = 2) + geom_point() + 
-  labs(y = "Active Cases", title = "Figure 9. Total USA active cases each month") + 
+  labs(y = "Active Cases", title = "Figure 9. Total USA Covid-19 active cases each month") + 
   theme(axis.text.x = element_text(size = 10), 
         axis.text.y = element_text(size = 10), 
         axis.title.x = element_text(size = 15), 
         axis.title.y = element_text(size = 15), 
-        legend.key.size = unit(1, 'cm'), 
-        legend.text = element_text(size = 13), 
         title = element_text(size = 13))
 ```
 
@@ -1431,9 +1429,16 @@ lineplot3 + geom_line(lwd = 2) + geom_point() +
 ![](/images/unnamed-chunk-16-1.png)<!-- -->
 
 ``` r
-#mydata2 <- mydata1 %>% mutate(Total = Confirmed - Confirmed2, Death = Deaths - Deaths2, Active_cases = Active - Active2, 
-#                              Month = rep(c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"))) %>% 
-#  select(State, Month, Total, Death, Active_cases)
-#names(mydata2) <- c("Province","State", "Month", "Total", "Deaths", "Active")
-#mydata2
+lineplot4 <- ggplot(data = overall, aes(x = Month, y = Death))
+lineplot4 + geom_line(lwd = 2) + geom_point() + 
+  labs(y = "Total Deaths", title = "Figure 10. Total USA Covid-19 deaths each month") + 
+  theme(axis.text.x = element_text(size = 10), 
+        axis.text.y = element_text(size = 10), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15), 
+        title = element_text(size = 13))
 ```
+
+    ## geom_path: Each group consists of only one observation. Do you need to adjust the group aesthetic?
+
+![](/images/unnamed-chunk-16-2.png)<!-- -->
