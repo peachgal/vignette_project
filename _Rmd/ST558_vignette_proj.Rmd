@@ -17,7 +17,7 @@ rmarkdown::render("C:/Users/peach/Documents/ST558/ST558_repos/vignette_project/_
 )
 ```
 
-## Goal of Vignette
+## 1. Goal of Vignette
 
 Since Covid-19 wide-spread the whole globe, most of people's lives have been affected and even changed. However, with the administration of vaccination, we all hope to get back to the life it was like before. To do this, we need to get the majority population vaccination rate up to more than 70% for the community immunity to take effect. The purpose of this vignette is to see how the vaccination and state-mandated regulations have affected the active cases and deaths across the United States. Therefore, we are going to sum up all the active cases and deaths for each state and each month. Then, we will look at nite months of state-wide data about the active cases and deaths starting from January 2021. 
 
@@ -33,7 +33,7 @@ The criteria I am using is based on vaccination progress in North Carolina. Sinc
 
 Therefore, the goal of this vignette is to create functions to help users query Covid-19 related data from [Covid-19 API site](https://covid19api.com) and parse the data into a nicely formatted tibble or data frame. Upon obtaining the data, we can then use it to perform some exploratory data analysis such as numerical summaries and plots for better visualization.
 
-### Required Packages
+### 1.1. Required Packages
 
 Below is a list of packages needed to create the vignette:  
   
@@ -446,11 +446,11 @@ live_status_after_date <- function(country_name = "BB", status = "confirmed",
 }
 ```
 
-## Customized Functions
+## 2. Customized Functions
 
 I created some customized functions implemented with some user-friendly input arguments to query the Covid-19 data from [Covid-19 API](https://covid19api.com/). Then, I created a wrapper function, `choose_api`, which contains those nine customized functions to obtain the correct API URL to query the data needed for the users. Users would only need to supply with arguments like the country they want to query from, status of the query (total confirmed cases, recovered cases, or number of deaths), and starting from certain date and time they want to query the data. Users can use `choose_api` function to check if their query API URL is correct to query the data they need. Then, they can use the exact same arguments they used in the `choose_api` function in the `get_data` function to obtain the parsed data in a usable form. Thus, if the API URL obtained from `choose_api` function is not correct, those same arguments are surely not going to work in the `get_data` function. Therefore, `choose_api` function is a way to make sure if the user-supplied arguments are correct, and the obtained API URL is what the users want to query. 
 
-### A List of Customized Functions
+### 2.1. A List of Customized Functions
 
 Let's look at the options of the data the customized functions can query:  
 
@@ -537,7 +537,7 @@ get_data <- function(type, ...){
 }
 ```
 
-### A List of Input Arguments and their Defaults
+### 2.2. A List of Input Arguments and their Defaults
 
 The table below show a list of customized API functions with their corresponding arguments and defaults set. 
 
@@ -584,20 +584,20 @@ Let's look at the options each argument can take:
 
 **Note 2: Free API query does not require a key for the Covid-19 API site. However, free queries have limited access and functionality. For example, free queries can only query up to a week of data at once. So, if you need to query a month of data. you will have to run the query four times with different date inputs.**
 
-### Using an API
+### 2.3 Using an API
 
 Below is the API URL used with `get_data` function I created to query the data for all cases type for the United States from January 3rd, 2021 to January 5th, 2021 (3 days). We can see it returns for 10,000 rows and 13 columns including every city from every state in the United States for 3 days worth of all cases type of data. I realized by looking at this example data that all cases types are accumulated up untill the date/time queried. If I want to calculate all cases types for each month for each state in the United States, I can query one day of data at the end of each month, group by each state and sum up all different cases type, subtract them from the previous end of month one day data. Then, we will have the number of all cases types per state per month, not cumulatively. Let's see if this works!
 
-```{r eval=FALSE}
+```{r eval=TRUE}
 choose_api(5, "usa", date_from="2021 1 3", date_to="2021 1 5", time_to="23:59:59")
 test_data <- get_data(5, "usa", date_from="2021 1 3", date_to="2021 1 5", time_to="23:59:59")
 test_data <- test_data %>% group_by(City)
 test_data
 ```
 
-## Getting the Data
+## 3. Getting the Data
 
-### Combining Date Sets
+### 3.1. Combining Date Sets
 
 Since the free Covid-19 data query does not require a key and has limited access/queries. For instance, each time we make a request to query, we can only query data for a range up to a week. Thus, I made a single-day query for the last day of each month from December 2020 to September 2021 since the data is accumulated. I only selected five columns (*Province*, *Confirmed*, *Deaths*, *Active*, *Date*) from each query and saved them to an object named by a month of that query. I row-combined those objects/queries into two different data sets since they all have the same column names. This way I did so that I can column-combine them later and subtract the same case type for each state for each month. 
 
@@ -641,11 +641,11 @@ late_date <- rbind(jan_2, feb_2, mar_2, apr_2, may_2, jun_2, jul_2, aug_2, sep_2
 early_date <- rbind(dec_2, jan_2, feb_2, mar_2, apr_2, may_2, jun_2, jul_2, aug_2)
 ```
 
-## Data Manipulation
+## 4. Data Manipulation
 
 At this point, I have data from every city in each state. So, I grouped by *Province* and *Date* and sum up all different case types for each state for the same date. I applied this to both data sets. Then, I changed the names of the columns in one of the datasets in order to perform a column-combination of the two tables afterwards and saved it as an object, *mydata1*. Now, *mydata1* is in a format I had in mind earlier as shown in the table above. 
 
-```{r eval=TRUE}
+```{r eval=TRUE, warning=FALSE, message=FALSE}
 after_date <- late_date %>% group_by(Province, Date) %>% summarise(across(c(Confirmed, Deaths, Active), sum))
 before_date <- early_date %>% group_by(Province, Date) %>% summarise(across(c(Confirmed, Deaths, Active), sum))
 
@@ -655,7 +655,7 @@ mydata1 <- mydata1[-1:-9, ]
 mydata1
 ```
 
-### Creating Numeric Variables
+### 4.1. Creating Numeric Variables
 
 Now we are ready to subtract each case type from itself from the previous month and obtain the total number of confirmed cases, active cases and deaths for each month for each state. Then, we can compare those numbers between different states.
 
@@ -678,7 +678,7 @@ mydata2
 # write_csv(x = mydata2, path = "../_Data/covid_data.csv")
 ```
 
-### Creating Categorical Variables
+### 4.2. Creating Categorical Variables
 
 Upon inspecting the data, I discovered eight states I wanted to be excluded from the data analysis. So, I created an infix function, `%!in%`, that is negation of the infix function, `%in%`. I used it to filter the rows whenever *Province* contains those states. These states I excluded from the data are: "American Samoa", "Diamond Princess", "Grand Princess", "Guam", "Northern Mariana Islands", "Puerto Rico" and "Virgin Islands". They may be potential outliers since their number of cases may be really low for each case type. 
 
@@ -713,9 +713,9 @@ mydata3$Total_cases <- cut(mydata3$Total_cases, 3, c("Less than 9,000 cases", "B
 mydata3$vaccine <- cut(mydata3$vaccine, 3, c("Vaccinat-ING", "Some vaccinated", "Back to school"))
 ```
 
-## Exploratory Data Analysis
+## 5. Exploratory Data Analysis
 
-### Contingency Tables
+### 5.1. Contingency Tables
 
 Now we have 51 states, and each state has nine months worth of data. Therefore, 51 x 9 = 459 rows in the data. Each event in Table 1 represents one state and one month. However, since "vaccinat-ing" period has 4 months, "Some vaccinated" period contains 3 months and "Back to school" period only has 2 months, the data is not on a even scale for the three categories. Hence, we cannot compare them across columns. We can only compare them down the rows within each column. 
 
@@ -742,13 +742,13 @@ mydata3 %>% filter(Province %in% c("California", "New York", "Florida", "Texas",
   kable(caption = "Table 3. Total Confirmed Cases for Each Month across Different States")
 ```
 
-### Numerical Summaries
+### 5.2. Numerical Summaries
 
 Table 4 and Table 5 shows the numerical summaries of active cases and deaths during each vaccine timeline for North Carolina and its neighbors. North Carolina was placed pretty high regarding to the active cases for each timeline right below Georgia, followed by Tennessee. Shockingly, the average active cases for "back to school" period all exceeded the average active cases for "vaccinat-ing" period for every state with Virginia being a close-call. The number was almost doubled for some states or more than doubled for Tennessee. This indicates that "back to school" event drove the number of cases up in each state and counterattacked the great effect brought by wide-spread vaccine administration. The effect of vaccine is shown in the "some vaccinated" period that drove the average active cases down.
 
 However, the effect of "going back to school" event is not as dramatic as shown in Table 4 as in Table 5. The number of deaths did go up during "back to school" period due to elevated number of active cases in the same period, however, that number was not almost doubled or doubled. They were only matching or even. This could be the vaccines were developing antibodies and immunity in our body, and hence, the infected individuals had a better chance to fight the virus and survived during "back to school" period. People should really get their vaccine shots if they have not already. 
 
-```{r eval=TRUE, message=FALSE}
+```{r eval=TRUE, message=FALSE, warning=FALSE}
 mydata3 %>% filter(Province %in% c("North Carolina", "South Carolina", "Tennessee","Georgia", "Virginia")) %>% 
   group_by(Province, vaccine) %>% 
   summarise(Avg_active = mean(Active), SD_active = sd(Active), Median_active = median(Active), IQR_active = IQR(Active)) %>% 
@@ -760,9 +760,9 @@ mydata3 %>% filter(Province %in% c("North Carolina", "South Carolina", "Tennesse
   kable(digit = 2, caption = "Table 5. Number of deaths per vaccine timeline for North Carolina and its neighbors.")
 ```
 
-### Visualization
+### 5.3. Visualization
 
-#### Bar-Plots
+#### 5.3.1. Bar-Plots
 
 We combined with the findings we learnt from Table 1, Table 2 and Table 3 and showed them in Figure 1 and Figure 2 below. 
 
@@ -804,7 +804,7 @@ d + geom_bar(stat = "identity", position = "dodge") +
         title = element_text(size = 13))
 ```
 
-#### Box-Plots
+#### 5.3.2. Box-Plots
 
 Figure 3 and Figure 4 show the entire US data of active cases and deaths at each timeline. Note that each state has four dots in "vaccinat-ing" period, three dots in "some vaccinated" period and two dots in "back to school" period. So, there will be more data points in the first period than the second period and the third period. In addition, I apologize that due to the numerous outliers in both boxplots, I had to adjust the y-axis scales in order to see the median for each timeline. 
 
@@ -840,7 +840,7 @@ boxplot2 + geom_boxplot(fill = "white", outlier.shape = NA) +
         title = element_text(size = 14))
 ```
 
-#### Scatterplot
+#### 5.3.3. Scatterplot
 
 Figure 5 scatterplot shows the relationship between number of active cases and number of deaths for different timelines in US. We can already guess that the relationship between active cases and deaths is a strong positive correlation. However, will that correlation stay the same between them for all vaccine time groups? Apparently not! Figure 5 indicates that in the "vaccinat-ing" period, the correlation between active cases and deaths is the strongest compared to the other two time groups. However, when the vaccine shots were taken place across US, approximately 40% of the population were vaccinated and together with the State-mandated restrictions during "some vaccinated" period, despite the increasing active cases, deaths were not imminent in this period. The active cases and number of deaths have the weakest correlation in the "some vaccinated" period. 
 
@@ -876,7 +876,7 @@ scatter + geom_point(aes(shape = f500_deaths),size = 3) +
 #scale_fill_discrete(name = NULL)
 ```
 
-#### Histogram
+#### 5.3.4.Histogram
 
 Figure 6 shows histograms of number of deaths in US at different timelines. This may not be as helpful to us as the other plots. Remember there is one issue we addressed in the boxplots section. That is, there are twice as much data points in the "vaccinat-ing" period than in the "back to school" period since the "vaccinat-ing" period has four months of data for each state while the "back to school" period only has two months of data. Regardless, we see a significantly low deaths count in the "some vaccinated" period than the other two timelines. This says with approximately 40% of US population being vaccinated at least one shot and with the most state-mandated regulations on Covid-19 restrictions in the "some-vaccinated" period, we had a low deaths count in the same period.
 
@@ -895,7 +895,7 @@ his + geom_histogram() +
   facet_wrap(~vaccine) 
 ```
 
-#### Line Plots
+#### 5.3.5. Line Plots
 
 Figure 7 shows the total number of active cases each month in North Carolina and its neighbors since January 2021. The plot indicates the numbers were decreasing each month since January for every state and finally reached the minimum number of active cases so far for every state in June 2021. Then, the numbers were slowly going back up but then elevated when students went back to classroom and most states relaxed on their Covid-19 restrictions such as mask mandate and social distancing. This is reflected in the numerical summary shown in Table 4. 
 
@@ -931,5 +931,5 @@ lineplot1 + geom_line(aes(group = State), lwd = 2) + geom_point() +
 
 ```
 
-### Conclusion
+## 6. Conclusion
 

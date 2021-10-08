@@ -3,25 +3,26 @@ ST558 - Vignette Project - Covid-19 Data
 Jasmine Wang
 10/07/2021
 
--   [Goal of Vignette](#goal-of-vignette)
-    -   [Required Packages](#required-packages)
--   [Customized Functions](#customized-functions)
-    -   [A List of Customized
-        Functions](#a-list-of-customized-functions)
-    -   [A List of Input Arguments and their
-        Defaults](#a-list-of-input-arguments-and-their-defaults)
-    -   [Using an API](#using-an-api)
--   [Getting the Data](#getting-the-data)
-    -   [Combining Date Sets](#combining-date-sets)
--   [Data Manipulation](#data-manipulation)
-    -   [Creating Numeric Variables](#creating-numeric-variables)
-    -   [Creating Categorical
-        Variables](#creating-categorical-variables)
--   [Exploratory Data Analysis](#exploratory-data-analysis)
-    -   [Contingency Tables](#contingency-tables)
-    -   [Numerical Summaries](#numerical-summaries)
-    -   [Visualization](#visualization)
-    -   [Conclusion](#conclusion)
+-   [1. Goal of Vignette](#1-goal-of-vignette)
+    -   [1.1. Required Packages](#11-required-packages)
+-   [2. Customized Functions](#2-customized-functions)
+    -   [2.1. A List of Customized
+        Functions](#21-a-list-of-customized-functions)
+    -   [2.2. A List of Input Arguments and their
+        Defaults](#22-a-list-of-input-arguments-and-their-defaults)
+    -   [2.3 Using an API](#23-using-an-api)
+-   [3. Getting the Data](#3-getting-the-data)
+    -   [3.1. Combining Date Sets](#31-combining-date-sets)
+-   [4. Data Manipulation](#4-data-manipulation)
+    -   [4.1. Creating Numeric
+        Variables](#41-creating-numeric-variables)
+    -   [4.2. Creating Categorical
+        Variables](#42-creating-categorical-variables)
+-   [5. Exploratory Data Analysis](#5-exploratory-data-analysis)
+    -   [5.1. Contingency Tables](#51-contingency-tables)
+    -   [5.2. Numerical Summaries](#52-numerical-summaries)
+    -   [5.3. Visualization](#53-visualization)
+-   [6. Conclusion](#6-conclusion)
 
 ``` r
 knitr::opts_chunk$set(fig.path = "/images/")
@@ -35,7 +36,7 @@ rmarkdown::render("C:/Users/peach/Documents/ST558/ST558_repos/vignette_project/_
 )
 ```
 
-## Goal of Vignette
+## 1. Goal of Vignette
 
 Since Covid-19 wide-spread the whole globe, most of people’s lives have
 been affected and even changed. However, with the administration of
@@ -76,7 +77,7 @@ tibble or data frame. Upon obtaining the data, we can then use it to
 perform some exploratory data analysis such as numerical summaries and
 plots for better visualization.
 
-### Required Packages
+### 1.1. Required Packages
 
 Below is a list of packages needed to create the vignette:
 
@@ -489,7 +490,7 @@ live_status_after_date <- function(country_name = "BB", status = "confirmed",
 }
 ```
 
-## Customized Functions
+## 2. Customized Functions
 
 I created some customized functions implemented with some user-friendly
 input arguments to query the Covid-19 data from [Covid-19
@@ -509,7 +510,7 @@ Therefore, `choose_api` function is a way to make sure if the
 user-supplied arguments are correct, and the obtained API URL is what
 the users want to query.
 
-### A List of Customized Functions
+### 2.1. A List of Customized Functions
 
 Let’s look at the options of the data the customized functions can
 query:
@@ -619,7 +620,7 @@ get_data <- function(type, ...){
 }
 ```
 
-### A List of Input Arguments and their Defaults
+### 2.2. A List of Input Arguments and their Defaults
 
 The table below show a list of customized API functions with their
 corresponding arguments and defaults set.
@@ -691,7 +692,7 @@ example, free queries can only query up to a week of data at once. So,
 if you need to query a month of data. you will have to run the query
 four times with different date inputs.**
 
-### Using an API
+### 2.3 Using an API
 
 Below is the API URL used with `get_data` function I created to query
 the data for all cases type for the United States from January 3rd, 2021
@@ -708,14 +709,34 @@ cumulatively. Let’s see if this works!
 
 ``` r
 choose_api(5, "usa", date_from="2021 1 3", date_to="2021 1 5", time_to="23:59:59")
+```
+
+    ## [1] "https://api.covid19api.com/country/united-states?from=2021-01-03T00:00:00Z&to=2021-01-05T23:59:59Z"
+
+``` r
 test_data <- get_data(5, "usa", date_from="2021 1 3", date_to="2021 1 5", time_to="23:59:59")
 test_data <- test_data %>% group_by(City)
 test_data
 ```
 
-## Getting the Data
+    ## # A tibble: 10,011 x 13
+    ##    ID                                   Country  CountryCode Province  City  CityCode Lat   Lon   Confirmed Deaths Recovered Active Date 
+    ##    <chr>                                <chr>    <chr>       <chr>     <chr> <chr>    <chr> <chr>     <int>  <int>     <int>  <int> <chr>
+    ##  1 00055249-20ac-45e9-a173-7b306e8acaf0 United ~ US          Texas     Hend~ 48213    32.21 -95.~      3675     78         0   3597 2021~
+    ##  2 000f161d-225d-43cc-baf4-7c0ba49423b1 United ~ US          New Mexi~ Torr~ 35057    34.64 -105~       498      4         0    494 2021~
+    ##  3 00591a34-171d-43b5-9389-21d7ddec8ab7 United ~ US          Oklahoma  Pitt~ 40121    34.92 -95.~      3184     25         0   3159 2021~
+    ##  4 009f4dd8-e8fe-4cbe-b667-ada7cb68d23e United ~ US          Arkansas  Mill~ 5091     33.31 -93.~      2818     25         0   2793 2021~
+    ##  5 00b299cb-febb-4eee-875c-2e814861b2cb United ~ US          Mississi~ Tate  28137    34.65 -89.~      2441     56         0   2385 2021~
+    ##  6 00d8ef35-c084-4e4a-b454-528066123d41 United ~ US          Illinois  Wayne 17191    38.43 -88.~      1358     40         0   1318 2021~
+    ##  7 00eb8717-82f7-4cbc-927e-ad1dc5f27c0d United ~ US          Virginia  Carr~ 51035    36.73 -80.~      1534     36         0   1498 2021~
+    ##  8 0105b524-ad7b-4abd-bef5-7fa28d94a6c9 United ~ US          South Da~ Auro~ 46003    43.72 -98.~       414      8         0    406 2021~
+    ##  9 0105d892-7d39-4015-b9b7-18fbabc47ae6 United ~ US          Tennessee Laud~ 47097    35.76 -89.~      2702     29         0   2673 2021~
+    ## 10 012b834c-2e62-44b4-9788-838a07bdf369 United ~ US          New Jers~ Camd~ 34007    39.8  -74.~     32243    833         0  31410 2021~
+    ## # ... with 10,001 more rows
 
-### Combining Date Sets
+## 3. Getting the Data
+
+### 3.1. Combining Date Sets
 
 Since the free Covid-19 data query does not require a key and has
 limited access/queries. For instance, each time we make a request to
@@ -771,7 +792,7 @@ late_date <- rbind(jan_2, feb_2, mar_2, apr_2, may_2, jun_2, jul_2, aug_2, sep_2
 early_date <- rbind(dec_2, jan_2, feb_2, mar_2, apr_2, may_2, jun_2, jul_2, aug_2)
 ```
 
-## Data Manipulation
+## 4. Data Manipulation
 
 At this point, I have data from every city in each state. So, I grouped
 by *Province* and *Date* and sum up all different case types for each
@@ -783,17 +804,8 @@ earlier as shown in the table above.
 
 ``` r
 after_date <- late_date %>% group_by(Province, Date) %>% summarise(across(c(Confirmed, Deaths, Active), sum))
-```
-
-    ## `summarise()` has grouped output by 'Province'. You can override using the `.groups` argument.
-
-``` r
 before_date <- early_date %>% group_by(Province, Date) %>% summarise(across(c(Confirmed, Deaths, Active), sum))
-```
 
-    ## `summarise()` has grouped output by 'Province'. You can override using the `.groups` argument.
-
-``` r
 names(before_date) <- c("State", "Date2", "Confirmed2", "Deaths2", "Active2")
 mydata1 <- cbind(after_date, before_date)
 mydata1 <- mydata1[-1:-9, ]
@@ -815,7 +827,7 @@ mydata1
     ## 10 Alaska   2021-01-31T00:00:00Z     54350    262  54088 Alaska  2020-12-31T00:00:00Z      47014     206   46808
     ## # ... with 512 more rows
 
-### Creating Numeric Variables
+### 4.1. Creating Numeric Variables
 
 Now we are ready to subtract each case type from itself from the
 previous month and obtain the total number of confirmed cases, active
@@ -867,7 +879,7 @@ mydata2
 # write_csv(x = mydata2, path = "../_Data/covid_data.csv")
 ```
 
-### Creating Categorical Variables
+### 4.2. Creating Categorical Variables
 
 Upon inspecting the data, I discovered eight states I wanted to be
 excluded from the data analysis. So, I created an infix function,
@@ -908,9 +920,9 @@ mydata3$Total_cases <- cut(mydata3$Total_cases, 3, c("Less than 9,000 cases", "B
 mydata3$vaccine <- cut(mydata3$vaccine, 3, c("Vaccinat-ING", "Some vaccinated", "Back to school"))
 ```
 
-## Exploratory Data Analysis
+## 5. Exploratory Data Analysis
 
-### Contingency Tables
+### 5.1. Contingency Tables
 
 Now we have 51 states, and each state has nine months worth of data.
 Therefore, 51 x 9 = 459 rows in the data. Each event in Table 1
@@ -996,7 +1008,7 @@ mydata3 %>% filter(Province %in% c("California", "New York", "Florida", "Texas",
 
 Table 3. Total Confirmed Cases for Each Month across Different States
 
-### Numerical Summaries
+### 5.2. Numerical Summaries
 
 Table 4 and Table 5 shows the numerical summaries of active cases and
 deaths during each vaccine timeline for North Carolina and its
@@ -1077,9 +1089,9 @@ mydata3 %>% filter(Province %in% c("North Carolina", "South Carolina", "Tennesse
 Table 5. Number of deaths per vaccine timeline for North Carolina and
 its neighbors.
 
-### Visualization
+### 5.3. Visualization
 
-#### Bar-Plots
+#### 5.3.1. Bar-Plots
 
 We combined with the findings we learnt from Table 1, Table 2 and Table
 3 and showed them in Figure 1 and Figure 2 below.
@@ -1153,7 +1165,7 @@ d + geom_bar(stat = "identity", position = "dodge") +
 
 ![](/images/unnamed-chunk-11-2.png)<!-- -->
 
-#### Box-Plots
+#### 5.3.2. Box-Plots
 
 Figure 3 and Figure 4 show the entire US data of active cases and deaths
 at each timeline. Note that each state has four dots in “vaccinat-ing”
@@ -1212,7 +1224,7 @@ boxplot2 + geom_boxplot(fill = "white", outlier.shape = NA) +
 
 ![](/images/unnamed-chunk-12-2.png)<!-- -->
 
-#### Scatterplot
+#### 5.3.3. Scatterplot
 
 Figure 5 scatterplot shows the relationship between number of active
 cases and number of deaths for different timelines in US. We can already
@@ -1283,7 +1295,7 @@ scatter + geom_point(aes(shape = f500_deaths),size = 3) +
 #scale_fill_discrete(name = NULL)
 ```
 
-#### Histogram
+#### 5.3.4.Histogram
 
 Figure 6 shows histograms of number of deaths in US at different
 timelines. This may not be as helpful to us as the other plots. Remember
@@ -1317,7 +1329,7 @@ his + geom_histogram() +
 
 ![](/images/unnamed-chunk-14-1.png)<!-- -->
 
-#### Line Plots
+#### 5.3.5. Line Plots
 
 Figure 7 shows the total number of active cases each month in North
 Carolina and its neighbors since January 2021. The plot indicates the
@@ -1376,4 +1388,4 @@ lineplot1 + geom_line(aes(group = State), lwd = 2) + geom_point() +
 
 ![](/images/unnamed-chunk-15-2.png)<!-- -->
 
-### Conclusion
+## 6. Conclusion
